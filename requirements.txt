@@ -1,7 +1,3 @@
 streamlit
-tensorflow-cpu
-librosa
-numpy<2.0.0
-matplotlib
-soundfile
-
+tensorflow-cpu==2.15.0
+librosa==0.10.1
