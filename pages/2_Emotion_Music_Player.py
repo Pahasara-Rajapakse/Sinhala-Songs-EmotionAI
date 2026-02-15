@@ -27,20 +27,46 @@ st.markdown("""
 .main-title { text-align: center; color: #ffffff !important; font-size: 3rem; font-weight: 800; margin-bottom: 0px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 .sub-title { text-align: center; color: #bbbbbb; font-size: 1.1rem; margin-bottom: 30px; }
 
-/* Tabs Styling */
-.stTabs [data-baseweb="tab-list"] { gap: 15px; justify-content: center; padding-top: 20px !important; }
-.stTabs [data-baseweb="tab"] {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    color: #ffffff;
-    padding: 12px 30px;
-}
-.stTabs [aria-selected="true"] {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    border: 2px solid #ffffff !important;
-    color: #ffffff !important;
-}
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 15px;
+        background-color: transparent;
+        justify-content: center;
+        padding-bottom: 10px;
+        
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+    
+        color: #ffffff;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: rgba(255, 215, 0, 0.15) !important;
+        border: 2px solid #ffd700 !important;
+        color: #ffd700 !important;
+        transform: scale(1.05);
+    }
+    /* Button & Player Fixes */
+    .stButton>button {
+        border-radius: 12px !important;
+    }
+            
+            /* Focus Ring Fix - Meka thamai click kalama ena katha border eka ain karanne */
+    [data-baseweb="tab"]:focus, 
+    [data-baseweb="tab"]:active {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Tab list eke uda line eka kapena eka fix karanna thawa podi thalluwak */
+    .stTabs [data-baseweb="tab-list"] {
+        padding-top: 70px !important; /* Thawa poddak yata kala */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Yatin podi separator ekak damma */
+    }
 
 /* --- ALL BUTTONS (PURE WHITE) --- */
 div.stButton > button {
