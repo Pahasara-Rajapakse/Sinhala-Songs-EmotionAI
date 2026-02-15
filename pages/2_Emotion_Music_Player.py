@@ -26,7 +26,7 @@ st.markdown("""
 .main-title { text-align: center; color: #ffffff !important; font-size: 3rem; font-weight: 800; margin-bottom: 0px; }
 .sub-title { text-align: center; color: #bbbbbb; font-size: 1.1rem; margin-bottom: 30px; }
 .glass_card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 1.5rem; }
-.stTabs [data-baseweb="tab-list"] { gap: 15px; justify-content: center; padding-top: 20px !important; }
+.stTabs [data-baseweb="tab-list"] { gap: 15px; justify-content: center; padding-top: 20px !important; padding-bottom: 20px !important; }
 .stTabs [data-baseweb="tab"] { background-color: rgba(255, 255, 255, 0.05); border-radius: 15px; color: #ffffff; padding: 12px 30px; }
 .stTabs [aria-selected="true"] { background-color: rgba(255, 215, 0, 0.15) !important; border: 2px solid #ffd700 !important; color: #ffd700 !important; }
 .footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; text-align: center; }
