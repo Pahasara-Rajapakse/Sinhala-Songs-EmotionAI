@@ -85,6 +85,18 @@ div.stButton > button {
     justify-content: space-between;
     align-items: center;
 }
+
+    .footer-text {
+    color: #bbbbbb !important; /* Header eke gray color ekama thamai meka */
+    font-size: 0.9rem !important;
+    letter-spacing: 1px;
+    margin-bottom: 5px !important;
+}
+    .footer-sub {
+        color: #666666 !important;
+        font-size: 0.8rem !important;
+}  
+   
 </style>
 """, unsafe_allow_html=True)
 
