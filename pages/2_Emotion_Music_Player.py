@@ -170,84 +170,60 @@ with st.sidebar:
     st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
     st.markdown("<h2 style='color:#ffffff;'>📂 Music Library</h2>", unsafe_allow_html=True)
     
-    music_folder = st.text_input("Folder path", r"C:\Users\Pasindu Pahasara\Desktop\Demo")
+    # ලැප් එකේ Path එක දෙනවා වෙනුවට කෙලින්ම Files upload කරන්න දෙනවා
+    uploaded_files = st.file_uploader("Upload Sinhala Songs", type=['mp3', 'wav'], accept_multiple_files=True)
 
     if st.button("🚀 Build Emotion Library", use_container_width=True):
-        files = []
-        for root, _, fns in os.walk(music_folder):
-            for f in fns:
-                if f.lower().endswith((".mp3", ".wav")):
-                    files.append(os.path.join(root, f))
-
-        if not files:
-            st.warning("No audio files found")
+        if not uploaded_files:
+            st.warning("Please upload some audio files first!")
         else:
             library = {e: [] for e in EMOTION_CLASSES}
             
-            # --- CUSTOM PROGRESS UI ---
             st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
             status_container = st.empty()
             progress_bar = st.progress(0)
             
-            for i, path in enumerate(files):
-                # Classify
-                emo, conf = classify_song(path)
+            # Temporary folder එකක් හදනවා සින්දු ටික තියාගන්න (Cloud එකේදී ඕනේ)
+            if not os.path.exists("temp_songs"):
+                os.makedirs("temp_songs")
+
+            for i, uploaded_file in enumerate(uploaded_files):
+                # 1. සින්දුව තාවකාලිකව save කරගන්නවා path එකක් හදාගන්න
+                temp_path = os.path.join("temp_songs", uploaded_file.name)
+                with open(temp_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+
+                # 2. දැන් උඹේ පරණ විදිහටම classify කරනවා (path එක දැන් temp_path)
+                emo, conf = classify_song(temp_path)
+                
                 library[emo].append({
-                    "name": Path(path).stem,
-                    "path": path,
+                    "name": Path(uploaded_file.name).stem,
+                    "path": temp_path, # මෙතන path එක ඕන වෙනවා පස්සේ play කරන්න නම්
                     "confidence": conf
                 })
 
-                # Update Progress with Modern Look
-                percent = (i + 1) / len(files)
+                # --- PROGRESS UI (උඹේ පරණ ලස්සන UI එකමයි) ---
+                percent = (i + 1) / len(uploaded_files)
                 progress_bar.progress(percent)
                 
-                # Glass card ekaka thama status eka pennanne
                 status_container.markdown(f"""
-                <div style="
-                    background: rgba(255, 255, 255, 0.05);
-                    border-left: 4px solid #ffd700;
-                    padding: 10px;
-                    border-radius: 8px;
-                    margin-bottom: 10px;
-                ">
-                    <p style="margin:0; font-size:0.85rem; color:#ffd700; font-weight:bold;">
-                        Analyzing {i+1}/{len(files)}
-                    </p>
-                    <p style="margin:0; font-size:0.75rem; color:#aaa; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                        {Path(path).name}
-                    </p>
+                <div style="background: rgba(255, 255, 255, 0.05); border-left: 4px solid #ffd700; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                    <p style="margin:0; font-size:0.85rem; color:#ffd700; font-weight:bold;">Analyzing {i+1}/{len(uploaded_files)}</p>
+                    <p style="margin:0; font-size:0.75rem; color:#aaa; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{uploaded_file.name}</p>
                 </div>
                 """, unsafe_allow_html=True)
                 
-                time.sleep(0.01) # Slicing faster
+                time.sleep(0.01)
 
             st.session_state.library = library
             st.session_state.current_index = {e: 0 for e in EMOTION_CLASSES}
             
             # Final Success Message
             status_container.markdown(f"""
-            <div style="
-                background: rgba(46, 204, 113, 0.1);
-                border: 1px solid #2ecc71;
-                padding: 10px;
-                border-radius: 8px;
-                text-align: center;
-                color: #2ecc71;
-                font-weight: bold;
-            ">
-                ✅ {len(files)} Songs Synced!
+            <div style="background: rgba(46, 204, 113, 0.1); border: 1px solid #2ecc71; padding: 10px; border-radius: 8px; text-align: center; color: #2ecc71; font-weight: bold;">
+                ✅ {len(uploaded_files)} Songs Synced!
             </div>
             """, unsafe_allow_html=True)
-
-    # --- CLEAR LIBRARY BUTTON ---
-    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
-    if st.button("🗑️ Clear Library", use_container_width=True):
-        if "library" in st.session_state:
-            del st.session_state.library
-        if "current_index" in st.session_state:
-            del st.session_state.current_index
-        st.rerun()
 
 # ====================== 6. PLAYER UI ======================
 if "library" in st.session_state:
