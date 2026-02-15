@@ -141,87 +141,83 @@ def classify_song(path):
     final_idx = int(np.argmax(avg_pred))
     return EMOTION_CLASSES[final_idx], float(avg_pred[final_idx])
 
-# ====================== 5. LIBRARY LOGIC ======================
-if "library" not in st.session_state: st.session_state.library = None
-
-if st.session_state.library is None:
-    st.markdown("""
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin-bottom: 10px;">
-            <p style="margin: 0; font-size: 1.2rem; color: #ffffff; font-weight: bold;">Upload Your Song</p>
-            <h7 style="color: #666; font-size: 0.9rem;">MP3 or WAV (Max 90s Analysis)</h7>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    uploaded_files = st.file_uploader("Upload Songs", type=['mp3', 'wav'], accept_multiple_files=True)
-    if uploaded_files and st.button("🚀 Start AI Analysis", use_container_width=True):
-        library = {e: [] for e in EMOTION_CLASSES}
-        prog = st.progress(0)
-        if not os.path.exists("temp_songs"): os.makedirs("temp_songs")
-        for i, f in enumerate(uploaded_files):
-            p = os.path.join("temp_songs", f.name)
-            with open(p, "wb") as file: file.write(f.getbuffer())
-            emo, conf = classify_song(p)
-            library[emo].append({"name": Path(f.name).stem, "path": p, "confidence": conf})
-            prog.progress((i + 1) / len(uploaded_files))
-        st.session_state.library = library
-        st.session_state.current_index = {e: 0 for e in EMOTION_CLASSES}
-        st.rerun()
-
 # ====================== 6. PLAYER UI ======================
-else:
-    tabs = st.tabs([f"{EMO_ICONS[e]} {e}" for e in EMOTION_CLASSES])
+if "library" in st.session_state:
+    # Balanced Tabs with Titles and Icons
+    tab_titles = [f"{EMO_ICONS[e]} {e}" for e in EMOTION_CLASSES]
+    tabs = st.tabs(tab_titles)
+
     for emo, tab in zip(EMOTION_CLASSES, tabs):
         with tab:
             songs = st.session_state.library.get(emo, [])
-            if not songs: st.info(f"No {emo} songs."); continue
-            
+            if not songs:
+                st.info(f"No {emo} songs detected.")
+                continue
+
             idx = st.session_state.current_index.get(emo, 0)
             song = songs[idx]
 
+            st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
+
             # Player Card
-            st.markdown(f'<div class="player-card"><div><h5>{song["name"]}</h5>'
-                        f'<p style="color:#ffd700;">AI Confidence: {song["confidence"]:.1%}</p></div>'
-                        f'<div style="font-size:3.5rem;">{EMO_ICONS[emo]}</div></div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div>
+                <div style="
+                    background: rgba(255, 255, 255, 0.05);
+                    border-left: 4px solid #ffd700;
+                    padding: 10px;
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                    display:flex; 
+                    justify-content:space-between; 
+                    align-items:center;   
+                ">        
+                    <div>
+                        <h5 style="margin:0; color:#ffffff;">{song['name']}</h5>
+                        <p style="color:#ddd;">AI Confidence: <b>{song['confidence']:.1%}</b></p>
+                    </div>
+                    <div style="font-size: 3rem;">{EMO_ICONS[emo]}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-            # Center Audio Player
-            player_col1, player_col2, player_col3 = st.columns([1, 4, 1])
-            with player_col2:
-                with open(song["path"], "rb") as f: st.audio(f.read())
+         
+
+            # Audio Player
+            col_a, col_b, col_c = st.columns([1, 2, 1])
+            with col_b:
+                with open(song["path"], "rb") as f:
+                    st.audio(f.read())
+
+            # Balanced Controls
+            c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
+            with c2:
+                if st.button("⏮ Previous", key=f"prev_{emo}", use_container_width=True):
+                    st.session_state.current_index[emo] = max(0, idx - 1)
+                    st.rerun()
+            with c4:
+                if st.button("Next ⏭", key=f"next_{emo}", use_container_width=True):
+                    st.session_state.current_index[emo] = (idx + 1) % len(songs)
+                    st.rerun()
+
+            st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
             
-            # --- BALANCED PLAYER CONTROLS (PURE WHITE) ---
-            st.markdown("<br>", unsafe_allow_html=True)
-            # Equal sized columns for Next/Prev
-            btn_c1, btn_c2, btn_c3, btn_c4, btn_c5 = st.columns([1.5, 1.2, 0.6, 1.2, 1.5])
-            with btn_c2:
-                if st.button("⏮ Previous", key=f"p_{emo}"):
-                    st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
-            with btn_c4:
-                if st.button("Next ⏭", key=f"n_{emo}"):
-                    st.session_state.current_index[emo] = (idx + 1) % len(songs); st.rerun()
-
-            # Feedback Form
-            with st.expander("📝 Verify This Prediction (Research)"):
-                with st.form(key=f"f_{emo}_{idx}"):
-                    u_name = st.text_input("Your Name")
-                    u_emo = st.selectbox("Actual Emotion:", ["Select...", "Calm", "Energetic", "Happy", "Romantic", "Sad"])
-                    if st.form_submit_button("Submit"):
-                        if u_name and u_emo != "Select...":
-                            res = {"User": u_name, "Song": song['name'], "System": emo, "Actual": u_emo, "Match": "Yes" if emo == u_emo else "No", "Time": time.strftime("%H:%M:%S")}
-                            pd.DataFrame([res]).to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
-                            st.success("Feedback saved!")
-
-            # --- PLAYLIST (PURE WHITE) ---
-            st.markdown("<hr style='border: 0; height: 1px; background: rgba(255,255,255,0.1);'>", unsafe_allow_html=True) 
-            st.markdown("#### 📑 Emotion Playlist")
+            # Playlist List
+            st.markdown("#### 📑 Songs Playlist")
             for i, s in enumerate(songs):
-                if st.button(f"{i+1:02d}. {s['name']}", key=f"l_{emo}_{i}", use_container_width=True):
-                    st.session_state.current_index[emo] = i; st.rerun()
+                btn_label = f"{i+1:02d}. {s['name']}"
+                if st.button(btn_label, key=f"list_{emo}_{i}", use_container_width=True):
+                    st.session_state.current_index[emo] = i
+                    st.rerun()
+else:
+    st.markdown("<div style='text-align:center; padding:50px; color:#666;'>Add a folder and build library to start.</div>", unsafe_allow_html=True)
 
+# FOOTER
 # FOOTER
 st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
 st.markdown("""
 <div style='text-align:center; padding-bottom: 2rem;'>
     <p class='footer-text'>Powered by <b>MobileNetV2</b> & <b>TensorFlow</b></p>
-    <p class='footer-sub' style='text-align:center;'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
+    <p class='footer-sub'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
 </div>
 """, unsafe_allow_html=True)
