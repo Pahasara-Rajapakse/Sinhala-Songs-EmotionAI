@@ -145,12 +145,12 @@ if "library" not in st.session_state: st.session_state.library = None
 if st.session_state.library is None:
     st.markdown("""
         <div style="background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin-bottom: 10px;">
-            <p style="margin: 0; font-size: 1.2rem; color: #ffffff; font-weight: bold;">Upload Your Song</p>
+            <p style="margin: 0; font-size: 1.2rem; color: #ffffff; font-weight: bold;">Upload Your Songs</p>
             <h7 style="color: #666; font-size: 0.9rem;">MP3 or WAV (Max 90s Analysis)</h7>
         </div>
     """, unsafe_allow_html=True)
     
-    uploaded_files = st.file_uploader("Upload Songs", type=['mp3', 'wav'], accept_multiple_files=True)
+    uploaded_files = st.file_uploader(type=['mp3', 'wav'], accept_multiple_files=True)
     if uploaded_files and st.button("🚀 Start AI Analysis", use_container_width=True):
         library = {e: [] for e in EMOTION_CLASSES}
         prog = st.progress(0)
