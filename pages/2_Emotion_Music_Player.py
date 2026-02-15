@@ -119,7 +119,6 @@ def extract_logmel(y):
     return librosa.power_to_db(mel, ref=np.max).astype(np.float32)
 
 def classify_song(path):
-    # මැනික මෙන්න මෙතනයි උඹේ අර Accuracy එක වැඩි කරන "Chunking" ලොජික් එක තියෙන්නේ
     y, _ = librosa.load(path, sr=SR, mono=True, duration=MAX_AUDIO_DURATION)
     mel = extract_logmel(y)
     
@@ -147,6 +146,13 @@ def classify_song(path):
 if "library" not in st.session_state: st.session_state.library = None
 
 if st.session_state.library is None:
+    st.markdown("""
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin-bottom: 10px;">
+            <p style="margin: 0; font-size: 1.2rem; color: #ffffff; font-weight: bold;">Upload Your Song</p>
+            <h7 style="color: #666; font-size: 0.9rem;">MP3 or WAV (Max 90s Analysis)</h7>
+        </div>
+    """, unsafe_allow_html=True)
+    
     uploaded_files = st.file_uploader("Upload Songs", type=['mp3', 'wav'], accept_multiple_files=True)
     if uploaded_files and st.button("🚀 Start AI Analysis", use_container_width=True):
         library = {e: [] for e in EMOTION_CLASSES}
