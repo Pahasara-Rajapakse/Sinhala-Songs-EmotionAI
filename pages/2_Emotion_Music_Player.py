@@ -198,14 +198,14 @@ else:
                         f'<div style="font-size:3.5rem;">{EMO_ICONS[emo]}</div></div>', unsafe_allow_html=True)
 
             # Center Audio Player
-            _, col_mid, _ = st.columns([1, 6, 1])
+            _, col_mid, _ = st.columns([3, 6, 1])
             with col_mid:
                 with open(song["path"], "rb") as f: st.audio(f.read())
             
             # --- BALANCED PLAYER CONTROLS (GOLD) ---
             st.markdown("<br>", unsafe_allow_html=True)
             # Using 5 columns and putting buttons in 2 and 4 ensures absolute center balance
-            c1, c2, c3, c4, c5 = st.columns([1, 3, 0.5, 1, 1])
+            c1, c2, c3, c4, c5 = st.columns([1, 1, 0.5, 1, 1])
             with c2:
                 if st.button("⏮ Previous", key=f"p_{emo}"):
                     st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
