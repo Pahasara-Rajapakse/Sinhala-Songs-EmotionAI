@@ -28,23 +28,53 @@ st.markdown("""
 .sub-title { text-align: center; color: #bbbbbb; font-size: 1.1rem; margin-bottom: 30px; }
 
 /* Tabs Styling */
-.stTabs [data-baseweb="tab-list"] { gap: 15px; justify-content: center; padding-top: 20px !important; padding-bottom: 20px !important; }
+.stTabs [data-baseweb="tab-list"] { gap: 15px; justify-content: center; padding-top: 20px !important; }
 .stTabs [data-baseweb="tab"] {
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 15px;
     color: #ffffff;
     padding: 12px 30px;
-    font-weight: 600;
 }
 .stTabs [aria-selected="true"] {
     background-color: rgba(255, 215, 0, 0.15) !important;
     border: 2px solid #ffd700 !important;
     color: #ffd700 !important;
-    transform: scale(1.05);
 }
 
-/* Player Card Styling */
+/* --- GOLD BUTTONS (Player & Sidebar) --- */
+/* Targetting standard buttons to be Gold by default */
+div.stButton > button {
+    height: 45px !important; 
+    border-radius: 10px !important;
+    background: rgba(255, 215, 0, 0.1) !important; 
+    border: 1px solid #ffd700 !important;
+    color: #ffd700 !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+}
+
+/* --- PLAYLIST BUTTONS (PURE WHITE) --- */
+/* We wrap playlist buttons in a specific div to override the gold */
+.playlist-container div.stButton > button {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+    text-align: left !important;
+    font-weight: 400 !important;
+}
+
+/* Active Highlight for Playlist */
+.active-song div.stButton > button {
+    border: 1px solid #ffd700 !important;
+    background: rgba(255, 215, 0, 0.15) !important;
+    color: #ffd700 !important;
+}
+
+/* Audio Player Centering */
+.stAudio { width: 80% !important; margin: 0 auto !important; }
+
+/* General UI Fixes */
 .player-card {
     background: rgba(255, 255, 255, 0.05);
     border-left: 5px solid #ffd700;
@@ -55,37 +85,6 @@ st.markdown("""
     justify-content: space-between;
     align-items: center;
 }
-
-/* --- PLAYER BUTTONS (GOLD) --- */
-/* Next/Prev buttons are inside specific columns we target below */
-[data-testid="stHorizontalBlock"] div.stButton > button {
-    height: 45px !important; 
-    border-radius: 10px !important;
-    background: rgba(255, 215, 0, 0.1) !important; 
-    border: 1px solid #ffd700 !important;
-    color: #ffd700 !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    width: 100% !important;
-}
-
-/* --- PLAYLIST BUTTONS (PURE WHITE) --- */
-.playlist-container div.stButton > button {
-    background: transparent !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
-    text-align: left !important;
-    font-weight: 400 !important;
-}
-
-/* Active Highlight for Playlist */
-.active-song div.stButton > button {
-    border: 1px solid #ffd700 !important;
-    background: rgba(255, 215, 0, 0.1) !important;
-    color: #ffd700 !important;
-}
-
-.footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; text-align: center; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -168,6 +167,7 @@ if st.session_state.library is None:
 else:
     with st.sidebar:
         st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
+        # This Reset Button will now be Gold
         if st.button("↺ Reset Library", use_container_width=True):
             st.session_state.library = None; st.rerun()
 
@@ -186,13 +186,14 @@ else:
                         f'<div style="font-size:3.5rem;">{EMO_ICONS[emo]}</div></div>', unsafe_allow_html=True)
 
             # Center Audio Player
-            _, col_mid, _ = st.columns([1, 4, 1])
+            _, col_mid, _ = st.columns([1, 6, 1])
             with col_mid:
                 with open(song["path"], "rb") as f: st.audio(f.read())
             
             # --- BALANCED PLAYER CONTROLS (GOLD) ---
             st.markdown("<br>", unsafe_allow_html=True)
-            c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
+            # Using 5 columns and putting buttons in 2 and 4 ensures absolute center balance
+            c1, c2, c3, c4, c5 = st.columns([1, 1, 0.5, 1, 1])
             with c2:
                 if st.button("⏮ Previous", key=f"p_{emo}"):
                     st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
@@ -218,6 +219,7 @@ else:
             for i, s in enumerate(songs):
                 active = "active-song" if i == idx else ""
                 st.markdown(f'<div class="{active}">', unsafe_allow_html=True)
+                # These Buttons will now be Pure White
                 if st.button(f"{i+1:02d}. {s['name']}", key=f"l_{emo}_{i}", use_container_width=True):
                     st.session_state.current_index[emo] = i; st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
