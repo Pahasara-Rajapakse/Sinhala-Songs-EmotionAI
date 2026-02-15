@@ -15,7 +15,7 @@ MAX_AUDIO_DURATION = 100
 TARGET_FRAMES = 431
 
 EMOTION_CLASSES = ["Calm", "Energetic", "Happy", "Romantic", "Sad"]
-EMO_ICONS = {"Calm": "🍃", "Energetic": "🔥", "Happy": "☀️", "Romantic": "💖", "Sad": "🌧️"}
+EMO_ICONS = {"Calm": "🍃", "Energetic": "🔥", "Happy": "😊", "Romantic": "💖", "Sad": "🥺"}
 
 # ====================== 2. PAGE & PREMIUM CSS ======================
 st.set_page_config(page_title="Sinhala Emotion Music Player", page_icon="logo.png", layout="wide")
