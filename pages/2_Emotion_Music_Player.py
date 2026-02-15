@@ -27,46 +27,22 @@ st.markdown("""
 .main-title { text-align: center; color: #ffffff !important; font-size: 3rem; font-weight: 800; margin-bottom: 0px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 .sub-title { text-align: center; color: #bbbbbb; font-size: 1.1rem; margin-bottom: 30px; }
 
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 15px;
-        background-color: transparent;
-        justify-content: center;
-        padding-bottom: 10px;
-        
-    }
-    .stTabs [data-baseweb="tab"] {
-        background-color: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-    
-        color: #ffffff;
-        padding: 12px 30px;
-        font-weight: 600;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: rgba(255, 215, 0, 0.15) !important;
-        border: 2px solid #ffd700 !important;
-        color: #ffd700 !important;
-        transform: scale(1.05);
-    }
-    /* Button & Player Fixes */
-    .stButton>button {
-        border-radius: 12px !important;
-    }
-            
-            /* Focus Ring Fix - Meka thamai click kalama ena katha border eka ain karanne */
-    [data-baseweb="tab"]:focus, 
-    [data-baseweb="tab"]:active {
-        outline: none !important;
-        box-shadow: none !important;
-    }
-
-    /* Tab list eke uda line eka kapena eka fix karanna thawa podi thalluwak */
-    .stTabs [data-baseweb="tab-list"] {
-        padding-top: 70px !important; /* Thawa poddak yata kala */
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Yatin podi separator ekak damma */
-    }
+/* Tabs Styling */
+.stTabs [data-baseweb="tab-list"] { gap: 15px; justify-content: center; padding-top: 20px !important; }
+.stTabs [data-baseweb="tab"] {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    color: #ffffff;
+    padding: 12px 30px;
+    font-weight: 600;
+}
+.stTabs [aria-selected="true"] {
+    background-color: rgba(255, 215, 0, 0.15) !important;
+    border: 2px solid #ffd700 !important;
+    color: #ffd700 !important;
+    transform: scale(1.05);
+}
 
 /* --- ALL BUTTONS (PURE WHITE) --- */
 div.stButton > button {
@@ -77,18 +53,24 @@ div.stButton > button {
     color: #ffffff !important;
     font-weight: 500 !important;
     width: 100% !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 /* --- RESET BUTTON ONLY (GOLD) --- */
-/* Target the first button in the sidebar */
 section[data-testid="stSidebar"] div.stButton > button {
     background: rgba(255, 215, 0, 0.1) !important;
     border: 1px solid #ffd700 !important;
     color: #ffd700 !important;
     font-weight: 700 !important;
+}
+
+/* --- DOWNLOAD BUTTON FIX (NEEDS TO BE VISIBLE) --- */
+div.stDownloadButton > button {
+    height: 48px !important; 
+    border-radius: 10px !important;
+    background: #ffffff !important; /* Download button eka white karala font eka black kala */
+    color: #000000 !important;
+    font-weight: 700 !important;
+    width: 100% !important;
 }
 
 /* Player Card */
@@ -105,9 +87,6 @@ section[data-testid="stSidebar"] div.stButton > button {
 
 .footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; }
 .footer-sub { color: #666666 !important; font-size: 0.8rem !important; }
-
-/* Audio Center */
-.stAudio { width: 100% !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -130,19 +109,17 @@ with st.sidebar:
     
     st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
 
-    if os.path.exists("user_feedback.csv"):
-        st.markdown("### 📊 Download Responces")
-        with open("user_feedback.csv", "rb") as f:
-            st.download_button("📥 Download Results CSV", f, "testing_results.csv", "text/csv", use_container_width=True)
-
-    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)     
-
-    # Reset Button (Gold as requested)
+    # Reset Button
     if st.session_state.get('library') is not None:
         if st.button("↺ Reset Library", use_container_width=True):
             st.session_state.library = None
             st.rerun()
-            
+
+    if os.path.exists("user_feedback.csv"):
+        st.markdown("### 📊 Testing Data")
+        with open("user_feedback.csv", "rb") as f:
+            # Download Button (Meka dan supiriyata penawa)
+            st.download_button("📥 Download Results CSV", f, "testing_results.csv", "text/csv", use_container_width=True)
 
 # ====================== 4. HELPERS ======================
 def extract_logmel(y):
@@ -170,9 +147,32 @@ def classify_song(path):
     final_idx = int(np.argmax(avg_pred))
     return EMOTION_CLASSES[final_idx], float(avg_pred[final_idx])
 
+# ====================== 5. LIBRARY BUILDER ======================
+if "library" not in st.session_state or st.session_state.library is None:
+    st.markdown("""
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin: 50px 0;">
+            <h3>🎵 No Music Library Detected</h3>
+            <p style="color: #888;">Upload your tracks below to let AI analyze their emotions.</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    uploaded_files = st.file_uploader("Upload Songs", type=['mp3', 'wav'], accept_multiple_files=True)
+    if uploaded_files and st.button("🚀 Start AI Analysis", use_container_width=True):
+        library = {e: [] for e in EMOTION_CLASSES}
+        prog = st.progress(0)
+        if not os.path.exists("temp_songs"): os.makedirs("temp_songs")
+        for i, f in enumerate(uploaded_files):
+            p = os.path.join("temp_songs", f.name)
+            with open(p, "wb") as file: file.write(f.getbuffer())
+            emo, conf = classify_song(p)
+            library[emo].append({"name": Path(f.name).stem, "path": p, "confidence": conf})
+            prog.progress((i + 1) / len(uploaded_files))
+        st.session_state.library = library
+        st.session_state.current_index = {e: 0 for e in EMOTION_CLASSES}
+        st.rerun()
+
 # ====================== 6. PLAYER UI ======================
-if "library" in st.session_state:
-    # Balanced Tabs with Titles and Icons
+else:
     tab_titles = [f"{EMO_ICONS[e]} {e}" for e in EMOTION_CLASSES]
     tabs = st.tabs(tab_titles)
 
@@ -186,46 +186,32 @@ if "library" in st.session_state:
             idx = st.session_state.current_index.get(emo, 0)
             song = songs[idx]
 
-            st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
-
             # Player Card
             st.markdown(f"""
-            <div>
-                <div style="
-                    background: rgba(255, 255, 255, 0.05);
-                    border-left: 4px solid #ffd700;
-                    padding: 10px;
-                    border-radius: 8px;
-                    margin-bottom: 10px;
-                    display:flex; 
-                    justify-content:space-between; 
-                    align-items:center;   
-                ">        
+                <div class="player-card">
                     <div>
                         <h5 style="margin:0; color:#ffffff;">{song['name']}</h5>
-                        <p style="color:#ddd;">AI Confidence: <b>{song['confidence']:.1%}</b></p>
+                        <p style="color:#ffd700; margin:0;">AI Confidence: <b>{song['confidence']:.1%}</b></p>
                     </div>
                     <div style="font-size: 3rem;">{EMO_ICONS[emo]}</div>
                 </div>
-            </div>
             """, unsafe_allow_html=True)
 
-         
-
-            # Audio Player
+            # Audio Player Center
             col_a, col_b, col_c = st.columns([1, 2, 1])
             with col_b:
                 with open(song["path"], "rb") as f:
                     st.audio(f.read())
 
-            # Balanced Controls
-            c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
+            # Balanced Controls (Pure White)
+            st.markdown("<br>", unsafe_allow_html=True)
+            c1, c2, c3, c4, c5 = st.columns([1.5, 1.2, 0.6, 1.2, 1.5])
             with c2:
-                if st.button("⏮ Previous", key=f"prev_{emo}", use_container_width=True):
+                if st.button("⏮ Previous", key=f"prev_{emo}"):
                     st.session_state.current_index[emo] = max(0, idx - 1)
                     st.rerun()
             with c4:
-                if st.button("Next ⏭", key=f"next_{emo}", use_container_width=True):
+                if st.button("Next ⏭", key=f"next_{emo}"):
                     st.session_state.current_index[emo] = (idx + 1) % len(songs)
                     st.rerun()
 
@@ -240,17 +226,14 @@ if "library" in st.session_state:
                             pd.DataFrame([res]).to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
                             st.success("Feedback saved!")
 
-            st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
+            st.markdown("<hr style='border: 0; height: 1px; background: rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
             
-            # Playlist List
+            # Playlist List (Pure White)
             st.markdown("#### 📑 Songs Playlist")
             for i, s in enumerate(songs):
-                btn_label = f"{i+1:02d}. {s['name']}"
-                if st.button(btn_label, key=f"list_{emo}_{i}", use_container_width=True):
+                if st.button(f"{i+1:02d}. {s['name']}", key=f"list_{emo}_{i}", use_container_width=True):
                     st.session_state.current_index[emo] = i
                     st.rerun()
-else:
-    st.markdown("<div style='text-align:center; padding:50px; color:#666;'>Add a folder and build library to start.</div>", unsafe_allow_html=True)
 
 # FOOTER
 st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
