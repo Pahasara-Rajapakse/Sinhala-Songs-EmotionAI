@@ -34,7 +34,7 @@ st.set_page_config(
 # ====================== 6. MAIN UI ======================
 st.markdown("<h1 style='text-align:center;'> 🎧 Sinhala Song Emotion AI</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;color:#ccc;'>Emotion Recognition from Sinhala Songs</p>", unsafe_allow_html=True)
-
+st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
 st.markdown("""
 <style>
          
@@ -152,22 +152,33 @@ if st.session_state.active_file is not None:
     st.markdown("""
         <style>
             [data-testid="column"] { display: flex; align-items: center; }
+
             .stButton>button {
-                height: 60px;
-                border-radius: 12px !important;
-                background: rgba(0, 255, 127, 0.1) !important;
-                border: 1px solid rgba(0, 255, 127, 0.3) !important;
-                color: #00ff7f !important;
-            }
-            .stButton>button:hover {
-                background: rgba(0, 255, 127, 0.2) !important;
-                border: 1px solid #00ff7f !important;
-            }
+    height: 45px !important; 
+    border-radius: 10px !important;
+    background: rgba(255, 215, 0, 0.05) !important; 
+    border: 1px solid rgba(255, 215, 0, 0.2) !important;
+    color: #ffd700 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+}
+
+.stButton>button:hover {
+    background: rgba(255, 215, 0, 0.15) !important;
+    border: 1px solid #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
+}       
         </style>
     """, unsafe_allow_html=True)
 
+
     st.markdown('<div class="glass" style="padding: 10px; margin-bottom: 15px; border-left: 5px solid #ffd700;">', unsafe_allow_html=True)
-    col_info, col_reset = st.columns([0.75, 0.25])
+    col_info, col_reset = st.columns([0.8, 0.2])
     with col_info:
         st.markdown(f"""
             <div style="display: flex; align-items: center;">
@@ -179,12 +190,14 @@ if st.session_state.active_file is not None:
             </div>
         """, unsafe_allow_html=True)
     with col_reset:
-        if st.button("✨ Analyze New Song", use_container_width=True):
+        if st.button("↺ NEW ANALYSIS", use_container_width=True):
             st.session_state.active_file = None
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True) 
     st.audio(uploaded_file)
     st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
+
+
 
     col1, col2 = st.columns(2)
     with col1:
