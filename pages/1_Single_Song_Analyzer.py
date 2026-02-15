@@ -21,7 +21,7 @@ TARGET_FRAMES = 431
 
 # MUST MATCH TRAINING LABEL ORDER EXACTLY
 EMOTION_CLASSES = ["Calm", "Energetic", "Happy", "Romantic", "Sad"]
-EMO_ICONS = {"Calm": "🍃", "Energetic": "🔥", "Happy": "☀️", "Romantic": "💖", "Sad": "🌧️"}
+EMO_ICONS = {"Calm": "🍃", "Energetic": "🔥", "Happy": "😊", "Romantic": "💖", "Sad": "🥺"}
 
 # ====================== 2. PAGE & CSS ======================
 st.set_page_config(
