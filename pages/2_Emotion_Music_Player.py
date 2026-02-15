@@ -129,17 +129,20 @@ with st.sidebar:
         st.error("Model Error"); st.stop()
     
     st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
-    
+
+    if os.path.exists("user_feedback.csv"):
+        st.markdown("### 📊 Download Responces")
+        with open("user_feedback.csv", "rb") as f:
+            st.download_button("📥 Download Results CSV", f, "testing_results.csv", "text/csv", use_container_width=True)
+
+    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)     
+
     # Reset Button (Gold as requested)
     if st.session_state.get('library') is not None:
         if st.button("↺ Reset Library", use_container_width=True):
             st.session_state.library = None
             st.rerun()
-
-    if os.path.exists("user_feedback.csv"):
-        st.markdown("### 📊 Testing Data")
-        with open("user_feedback.csv", "rb") as f:
-            st.download_button("📥 Download Results CSV", f, "testing_results.csv", "text/csv", use_container_width=True)
+            
 
 # ====================== 4. HELPERS ======================
 def extract_logmel(y):
@@ -226,6 +229,17 @@ if "library" in st.session_state:
                     st.session_state.current_index[emo] = (idx + 1) % len(songs)
                     st.rerun()
 
+            # Feedback Form
+            with st.expander("📝 Verify This Prediction (Research)"):
+                with st.form(key=f"f_{emo}_{idx}"):
+                    u_name = st.text_input("Your Name")
+                    u_emo = st.selectbox("Actual Emotion:", ["Select...", "Calm", "Energetic", "Happy", "Romantic", "Sad"])
+                    if st.form_submit_button("Submit"):
+                        if u_name and u_emo != "Select...":
+                            res = {"User": u_name, "Song": song['name'], "System": emo, "Actual": u_emo, "Match": "Yes" if emo == u_emo else "No", "Time": time.strftime("%H:%M:%S")}
+                            pd.DataFrame([res]).to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
+                            st.success("Feedback saved!")
+
             st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
             
             # Playlist List
@@ -238,7 +252,6 @@ if "library" in st.session_state:
 else:
     st.markdown("<div style='text-align:center; padding:50px; color:#666;'>Add a folder and build library to start.</div>", unsafe_allow_html=True)
 
-# FOOTER
 # FOOTER
 st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
 st.markdown("""
