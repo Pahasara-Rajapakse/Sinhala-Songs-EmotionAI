@@ -64,8 +64,24 @@ st.markdown("""
 
 /* Professional Buttons */
 .stButton>button {
+    height: 45px !important; 
     border-radius: 10px !important;
-    transition: 0.3s;
+    background: rgba(255, 215, 0, 0.05) !important; 
+    border: 1px solid rgba(255, 215, 0, 0.2) !important;
+    color: #ffd700 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+}
+
+.stButton>button:hover {
+    background: rgba(255, 215, 0, 0.15) !important;
+    border: 1px solid #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
 }
 
 .footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; text-align: center; letter-spacing: 1px; }
@@ -116,7 +132,7 @@ if "library" not in st.session_state:
 
 if st.session_state.library is None:
     st.markdown("""
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin: 20px;">
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin: 20px;">
             <h2 style="color: #ffffff;">🎵 Build Your AI Music Library</h2>
             <p style="color: #bbb;">Upload songs to automatically sort them by emotion</p>
         </div>
@@ -151,7 +167,7 @@ if st.session_state.library is None:
 # ====================== 6. BALANCED PLAYER UI ======================
 else:
     with st.sidebar:
-        if st.button("✨ Reset & Upload New", use_container_width=True):
+        if st.button("↺ Reset & Upload New", use_container_width=True):
             st.session_state.library = None
             st.rerun()
 
@@ -172,7 +188,7 @@ else:
             st.markdown(f"""
             <div class="player-card">
                 <div>
-                    <h3 style="margin:0; color:#ffffff;">{song['name']}</h3>
+                    <h5 style="margin:0; color:#ffffff;">{song['name']}</h5>
                     <p style="color:#ffd700; margin:0; font-size:1.1rem;">AI Match: <b>{song['confidence']:.1%}</b></p>
                 </div>
                 <div style="font-size: 3.5rem;">{EMO_ICONS[emo]}</div>
