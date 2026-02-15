@@ -56,30 +56,29 @@ st.markdown("""
     align-items: center;
 }
 
-/* 1. Player Control Buttons (Gold) - ONLY FOR PLAYER */
-.player-controls div.stButton > button {
+/* --- PLAYER BUTTONS (GOLD) --- */
+/* Next/Prev buttons are inside specific columns we target below */
+[data-testid="stHorizontalBlock"] div.stButton > button {
     height: 45px !important; 
     border-radius: 10px !important;
-    background: rgba(255, 215, 0, 0.05) !important; 
-    border: 1px solid rgba(255, 215, 0, 0.5) !important;
+    background: rgba(255, 215, 0, 0.1) !important; 
+    border: 1px solid #ffd700 !important;
     color: #ffd700 !important;
     font-size: 0.85rem !important;
     font-weight: 600 !important;
-    text-transform: uppercase;
     width: 100% !important;
 }
 
-/* 2. Playlist Buttons (Pure White) */
+/* --- PLAYLIST BUTTONS (PURE WHITE) --- */
 .playlist-container div.stButton > button {
     background: transparent !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
-    text-transform: none !important;
     text-align: left !important;
-    padding-left: 20px !important;
+    font-weight: 400 !important;
 }
 
-/* Active Song Highlight (Gold) */
+/* Active Highlight for Playlist */
 .active-song div.stButton > button {
     border: 1px solid #ffd700 !important;
     background: rgba(255, 215, 0, 0.1) !important;
@@ -145,12 +144,12 @@ if "library" not in st.session_state: st.session_state.library = None
 if st.session_state.library is None:
     st.markdown("""
         <div style="background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin-bottom: 10px;">
-            <p style="margin: 0; font-size: 1.2rem; color: #ffffff; font-weight: bold;">Upload Your Songs</p>
+            <p style="margin: 0; font-size: 1.2rem; color: #ffffff; font-weight: bold;">Upload Your Song</p>
             <h7 style="color: #666; font-size: 0.9rem;">MP3 or WAV (Max 90s Analysis)</h7>
         </div>
     """, unsafe_allow_html=True)
     
-    uploaded_files = st.file_uploader("", type=['mp3', 'wav'], accept_multiple_files=True)
+    uploaded_files = st.file_uploader("Upload Songs", type=['mp3', 'wav'], accept_multiple_files=True)
     if uploaded_files and st.button("🚀 Start AI Analysis", use_container_width=True):
         library = {e: [] for e in EMOTION_CLASSES}
         prog = st.progress(0)
@@ -191,16 +190,15 @@ else:
             with col_mid:
                 with open(song["path"], "rb") as f: st.audio(f.read())
             
-            # Balanced Gold Buttons
-            st.markdown('<div class="player-controls">', unsafe_allow_html=True)
-            bc1, bc2, bc3, bc4, bc5 = st.columns([1, 1, 1, 1, 1])
-            with bc2:
+            # --- BALANCED PLAYER CONTROLS (GOLD) ---
+            st.markdown("<br>", unsafe_allow_html=True)
+            c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
+            with c2:
                 if st.button("⏮ Previous", key=f"p_{emo}"):
                     st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
-            with bc4:
+            with c4:
                 if st.button("Next ⏭", key=f"n_{emo}"):
                     st.session_state.current_index[emo] = (idx + 1) % len(songs); st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
 
             # Feedback Form
             with st.expander("📝 Verify This Prediction (Research)"):
@@ -213,7 +211,7 @@ else:
                             pd.DataFrame([res]).to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
                             st.success("Feedback saved!")
 
-            # White Playlist
+            # --- WHITE PLAYLIST ---
             st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.1), transparent);'>", unsafe_allow_html=True) 
             st.markdown("#### 📑 Emotion Playlist")
             st.markdown('<div class="playlist-container">', unsafe_allow_html=True)
