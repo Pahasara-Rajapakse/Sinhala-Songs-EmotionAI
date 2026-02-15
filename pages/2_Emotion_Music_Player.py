@@ -56,12 +56,12 @@ st.markdown("""
     align-items: center;
 }
 
-/* 1. Player Control Buttons (Gold) */
-div.stButton > button {
+/* 1. Player Control Buttons (Gold) - ONLY FOR PLAYER */
+.player-controls div.stButton > button {
     height: 45px !important; 
     border-radius: 10px !important;
     background: rgba(255, 215, 0, 0.05) !important; 
-    border: 1px solid rgba(255, 215, 0, 0.2) !important;
+    border: 1px solid rgba(255, 215, 0, 0.5) !important;
     color: #ffd700 !important;
     font-size: 0.85rem !important;
     font-weight: 600 !important;
@@ -69,17 +69,17 @@ div.stButton > button {
     width: 100% !important;
 }
 
-/* 2. Playlist Buttons (White) */
+/* 2. Playlist Buttons (Pure White) */
 .playlist-container div.stButton > button {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     color: #ffffff !important;
     text-transform: none !important;
     text-align: left !important;
     padding-left: 20px !important;
 }
 
-/* Active Song */
+/* Active Song Highlight (Gold) */
 .active-song div.stButton > button {
     border: 1px solid #ffd700 !important;
     background: rgba(255, 215, 0, 0.1) !important;
@@ -99,7 +99,6 @@ def load_model(path: str):
     return tf.keras.models.load_model(path)
 
 with st.sidebar:
-    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
     st.markdown("<h2 style='color:white;'>🧠 AI Engine</h2>", unsafe_allow_html=True)
     model_path = st.text_input("Model path", "mobileNetV2.keras")
     try:
@@ -114,7 +113,7 @@ with st.sidebar:
         with open("user_feedback.csv", "rb") as f:
             st.download_button("📥 Download Results CSV", f, "testing_results.csv", "text/csv", use_container_width=True)
 
-# ====================== 4. HELPERS (Corrected Logic) ======================
+# ====================== 4. HELPERS ======================
 def extract_logmel(y):
     mel = librosa.feature.melspectrogram(y=y, sr=SR, n_mels=N_MELS, n_fft=N_FFT, hop_length=HOP_LENGTH)
     return librosa.power_to_db(mel, ref=np.max).astype(np.float32)
@@ -122,7 +121,6 @@ def extract_logmel(y):
 def classify_song(path):
     y, _ = librosa.load(path, sr=SR, mono=True, duration=MAX_AUDIO_DURATION)
     mel = extract_logmel(y)
-    
     chunks = []
     hop = TARGET_FRAMES
     for start in range(0, mel.shape[1], hop):
@@ -131,14 +129,12 @@ def classify_song(path):
         if segment.shape[1] < TARGET_FRAMES:
             segment = np.pad(segment, ((0,0),(0,TARGET_FRAMES - segment.shape[1])))
         chunks.append(segment)
-        
     preds = []
     for seg in chunks:
         seg = (seg - seg.mean()) / (seg.std() + 1e-6)
         x = np.repeat(np.expand_dims(seg, axis=-1), 3, axis=-1)
         x = np.expand_dims(x, axis=0)
         preds.append(model.predict(x, verbose=0)[0])
-        
     avg_pred = np.mean(preds, axis=0)
     final_idx = int(np.argmax(avg_pred))
     return EMOTION_CLASSES[final_idx], float(avg_pred[final_idx])
@@ -190,20 +186,23 @@ else:
                         f'<p style="color:#ffd700;">AI Confidence: {song["confidence"]:.1%}</p></div>'
                         f'<div style="font-size:3.5rem;">{EMO_ICONS[emo]}</div></div>', unsafe_allow_html=True)
 
-            col1, col2, col3 = st.columns([1, 2, 1])
-            with col2:
+            # Center Audio Player
+            _, col_mid, _ = st.columns([1, 4, 1])
+            with col_mid:
                 with open(song["path"], "rb") as f: st.audio(f.read())
             
-            st.markdown("<br>", unsafe_allow_html=True)
-            c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
-            with c2:
+            # Balanced Gold Buttons
+            st.markdown('<div class="player-controls">', unsafe_allow_html=True)
+            bc1, bc2, bc3, bc4, bc5 = st.columns([1, 1, 1, 1, 1])
+            with bc2:
                 if st.button("⏮ Previous", key=f"p_{emo}"):
                     st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
-            with c4:
+            with bc4:
                 if st.button("Next ⏭", key=f"n_{emo}"):
                     st.session_state.current_index[emo] = (idx + 1) % len(songs); st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
-            # --- Feedback Form ---
+            # Feedback Form
             with st.expander("📝 Verify This Prediction (Research)"):
                 with st.form(key=f"f_{emo}_{idx}"):
                     u_name = st.text_input("Your Name")
@@ -214,8 +213,8 @@ else:
                             pd.DataFrame([res]).to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
                             st.success("Feedback saved!")
 
-            # Playlist
-            st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
+            # White Playlist
+            st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.1), transparent);'>", unsafe_allow_html=True) 
             st.markdown("#### 📑 Emotion Playlist")
             st.markdown('<div class="playlist-container">', unsafe_allow_html=True)
             for i, s in enumerate(songs):
@@ -231,6 +230,6 @@ st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(
 st.markdown("""
 <div style='text-align:center; padding-bottom: 2rem;'>
     <p class='footer-text'>Powered by <b>MobileNetV2</b> & <b>TensorFlow</b></p>
-    <p class='footer-sub'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
+    <p class='footer-sub' style='text-align:center; color:#666; font-size:0.8rem;'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
 </div>
 """, unsafe_allow_html=True)
