@@ -63,26 +63,6 @@ st.markdown("""
 }
 
 /* Professional Buttons */
-.stButton>button {
-    height: 45px !important; 
-    border-radius: 10px !important;
-    background: rgba(255, 215, 0, 0.05) !important; 
-    border: 1px solid rgba(255, 215, 0, 0.2) !important;
-    color: #ffd700 !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease !important;
-    width: 100% !important;
-}
-
-.stButton>button:hover {
-    background: rgba(255, 215, 0, 0.15) !important;
-    border: 1px solid #ffd700 !important;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
-    transform: translateY(-2px);
-}
 
 .footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; text-align: center; letter-spacing: 1px; }
 .footer-sub { color: #666666 !important; font-size: 0.8rem !important; text-align: center; }
