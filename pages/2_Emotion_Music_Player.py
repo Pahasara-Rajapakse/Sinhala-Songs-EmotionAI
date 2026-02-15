@@ -116,7 +116,7 @@ with st.sidebar:
     model_path = st.text_input("Model path", "mobileNetV2.keras")
     try:
         model = load_model(model_path)
-        st.success("AI Model Ready")
+        st.success("Model Loaded Successfully")
     except:
         st.error("Model Load Error"); st.stop()
     st.markdown("<hr style='opacity:0.2;'>", unsafe_allow_html=True)
