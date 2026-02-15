@@ -231,5 +231,10 @@ else:
             st.markdown('</div>', unsafe_allow_html=True)
 
 # FOOTER
-st.markdown("<br><hr style='opacity:0.2;'>", unsafe_allow_html=True)
-st.markdown("<div style='text-align:center;'><p class='footer-text'>Designed For Sinhala Emotion Recognition | 2026</p></div>", unsafe_allow_html=True)
+st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
+st.markdown("""
+<div style='text-align:center; padding-bottom: 2rem;'>
+    <p class='footer-text'>Powered by <b>MobileNetV2</b> & <b>TensorFlow</b></p>
+    <p class='footer-sub'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
+</div>
+""", unsafe_allow_html=True)
