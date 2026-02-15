@@ -77,6 +77,7 @@ if st.session_state.page == "home":
     # HEADER
     st.markdown("<h1 style='text-align:center;'>🎧 Sinhala Song Emotion AI</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#888 !important; font-size:1.1rem; max-width: 800px; margin: auto;'>Next-generation deep learning system designed for Sinhala Music Emotion Recognition and smart playback.</p>", unsafe_allow_html=True)
+    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
 # ====================== FEATURES NAVIGATION ======================
