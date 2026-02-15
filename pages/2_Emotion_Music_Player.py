@@ -42,8 +42,7 @@ st.markdown("""
     color: #ffd700 !important;
 }
 
-/* --- GOLD BUTTONS (Player & Sidebar) --- */
-/* Targetting standard buttons to be Gold by default */
+/* --- GOLD BUTTONS (Player & Sidebar & Upload) --- */
 div.stButton > button {
     height: 45px !important; 
     border-radius: 10px !important;
@@ -54,8 +53,7 @@ div.stButton > button {
     width: 100% !important;
 }
 
-/* --- PLAYLIST BUTTONS (PURE WHITE) --- */
-/* We wrap playlist buttons in a specific div to override the gold */
+/* --- PLAYLIST BUTTONS (STRICTLY PURE WHITE) --- */
 .playlist-container div.stButton > button {
     background: transparent !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -64,7 +62,7 @@ div.stButton > button {
     font-weight: 400 !important;
 }
 
-/* Active Highlight for Playlist */
+/* Active Highlight for Playlist (Gold for current song) */
 .active-song div.stButton > button {
     border: 1px solid #ffd700 !important;
     background: rgba(255, 215, 0, 0.15) !important;
@@ -72,7 +70,7 @@ div.stButton > button {
 }
 
 /* Audio Player Centering */
-.stAudio { width: 80% !important; margin: 0 auto !important; }
+.stAudio { width: 100% !important; }
 
 /* General UI Fixes */
 .player-card {
@@ -86,17 +84,9 @@ div.stButton > button {
     align-items: center;
 }
 
-    .footer-text {
-    color: #bbbbbb !important; /* Header eke gray color ekama thamai meka */
-    font-size: 0.9rem !important;
-    letter-spacing: 1px;
-    margin-bottom: 5px !important;
-}
-    .footer-sub {
-        color: #666666 !important;
-        font-size: 0.8rem !important;
-}  
-   
+.footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; letter-spacing: 1px; }
+.footer-sub { color: #666666 !important; font-size: 0.8rem !important; }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -179,7 +169,6 @@ if st.session_state.library is None:
 else:
     with st.sidebar:
         st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
-        # This Reset Button will now be Gold
         if st.button("↺ Reset Library", use_container_width=True):
             st.session_state.library = None; st.rerun()
 
@@ -197,19 +186,19 @@ else:
                         f'<p style="color:#ffd700;">AI Confidence: {song["confidence"]:.1%}</p></div>'
                         f'<div style="font-size:3.5rem;">{EMO_ICONS[emo]}</div></div>', unsafe_allow_html=True)
 
-            # Center Audio Player
-            _, col_mid, _ = st.columns([3, 6, 1])
+            # Center Audio Player (Balanced Columns)
+            col_left, col_mid, col_right = st.columns([1.5, 7, 1.5])
             with col_mid:
                 with open(song["path"], "rb") as f: st.audio(f.read())
             
             # --- BALANCED PLAYER CONTROLS (GOLD) ---
             st.markdown("<br>", unsafe_allow_html=True)
-            # Using 5 columns and putting buttons in 2 and 4 ensures absolute center balance
-            c1, c2, c3, c4, c5 = st.columns([3, 1, 0.5, 1, 1])
-            with c2:
+            # 5-Column layout with symmetric spacing
+            btn_c1, btn_c2, btn_c3, btn_c4, btn_c5 = st.columns([1, 1.5, 0.5, 1.5, 1])
+            with btn_c2:
                 if st.button("⏮ Previous", key=f"p_{emo}"):
                     st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
-            with c4:
+            with btn_c4:
                 if st.button("Next ⏭", key=f"n_{emo}"):
                     st.session_state.current_index[emo] = (idx + 1) % len(songs); st.rerun()
 
@@ -224,14 +213,13 @@ else:
                             pd.DataFrame([res]).to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
                             st.success("Feedback saved!")
 
-            # --- WHITE PLAYLIST ---
-            st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.1), transparent);'>", unsafe_allow_html=True) 
+            # --- PURE WHITE PLAYLIST ---
+            st.markdown("<hr style='border: 0; height: 1px; background: rgba(255,215,0,0.2);'>", unsafe_allow_html=True) 
             st.markdown("#### 📑 Emotion Playlist")
             st.markdown('<div class="playlist-container">', unsafe_allow_html=True)
             for i, s in enumerate(songs):
-                active = "active-song" if i == idx else ""
-                st.markdown(f'<div class="{active}">', unsafe_allow_html=True)
-                # These Buttons will now be Pure White
+                active_class = "active-song" if i == idx else "normal-song"
+                st.markdown(f'<div class="{active_class}">', unsafe_allow_html=True)
                 if st.button(f"{i+1:02d}. {s['name']}", key=f"l_{emo}_{i}", use_container_width=True):
                     st.session_state.current_index[emo] = i; st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -242,6 +230,6 @@ st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(
 st.markdown("""
 <div style='text-align:center; padding-bottom: 2rem;'>
     <p class='footer-text'>Powered by <b>MobileNetV2</b> & <b>TensorFlow</b></p>
-    <p class='footer-sub' style='text-align:center; color:#666; font-size:0.8rem;'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
+    <p class='footer-sub'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
 </div>
 """, unsafe_allow_html=True)
