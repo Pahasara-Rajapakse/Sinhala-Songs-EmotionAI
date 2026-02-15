@@ -34,17 +34,26 @@ st.markdown("""
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 [data-testid="column"] { display: flex; align-items: center; }
+
 .stButton>button {
-    height: 60px;
-    border-radius: 12px !important;
-    background: rgba(0, 255, 127, 0.1) !important;
-    border: 1px solid rgba(0, 255, 127, 0.3) !important;
-    color: #00ff7f !important;
-    transition: 0.3s;
+    height: 45px !important; 
+    border-radius: 10px !important;
+    background: rgba(255, 215, 0, 0.05) !important; /* පොඩි රත්තරන් පාටක් */
+    border: 1px solid rgba(255, 215, 0, 0.2) !important;
+    color: #ffd700 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
 }
+
 .stButton>button:hover {
-    background: rgba(0, 255, 127, 0.2) !important;
-    border: 1px solid #00ff7f !important;
+    background: rgba(255, 215, 0, 0.15) !important;
+    border: 1px solid #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -169,26 +178,31 @@ if st.session_state.active_file is None:
 if st.session_state.active_file is not None:
     uploaded_file = st.session_state.active_file
     
-    # Premium Player & Reset Button UI
-    st.markdown('<div class="glass" style="padding: 10px; margin-bottom: 15px; border-left: 5px solid #ffd700;">', unsafe_allow_html=True)
-    col_info, col_reset = st.columns([0.75, 0.25])
+    # Premium Player & Reset Button UI (Updated)
+    st.markdown('<div class="glass" style="padding: 15px; margin-bottom: 20px; border-left: 5px solid #ffd700;">', unsafe_allow_html=True)
+    
+    col_info, col_reset = st.columns([0.8, 0.2])
+    
     with col_info:
         st.markdown(f"""
             <div style="display: flex; align-items: center;">
-                <div style="background: #ffd700; padding: 12px; border-radius: 12px; font-size: 20px; margin-right: 15px; color: #000;">🎵</div>
+                <div style="background: linear-gradient(135deg, #ffd700, #ff8c00); padding: 10px; border-radius: 10px; margin-right: 15px; box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);">
+                    <span style="font-size: 20px;">🎵</span>
+                </div>
                 <div style="overflow: hidden;">
-                    <h4 style="margin: 0; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 1.1rem;">{uploaded_file.name}</h4>
-                    <p style="margin: 0; color: #888; font-size: 0.8rem;">Acoustic Analysis Ready</p>
+                    <h4 style="margin: 0; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 1rem; letter-spacing: 0.5px;">{uploaded_file.name}</h4>
+                    <p style="margin: 0; color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Acoustic Analysis Active</p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
+    
     with col_reset:
-        if st.button("✨ Analyze New", use_container_width=True):
+    
+        if st.button("↺ NEW ANALYSIS", use_container_width=True):
             st.session_state.active_file = None
             st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True) 
-
-    st.audio(uploaded_file)
+            
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Trigger Analysis
     with st.spinner("🧠 AI is extracting acoustic personality features..."):
