@@ -99,6 +99,7 @@ def load_model(path: str):
     return tf.keras.models.load_model(path)
 
 with st.sidebar:
+    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
     st.markdown("<h2 style='color:white;'>🧠 AI Engine</h2>", unsafe_allow_html=True)
     model_path = st.text_input("Model path", "mobileNetV2.keras")
     try:
@@ -107,7 +108,7 @@ with st.sidebar:
     except:
         st.error("Model Error"); st.stop()
     
-    st.markdown("---")
+    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
     if os.path.exists("user_feedback.csv"):
         st.markdown("### 📊 Testing Data")
         with open("user_feedback.csv", "rb") as f:
@@ -213,6 +214,7 @@ else:
                             st.success("Feedback saved!")
 
             # Playlist
+            st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True) 
             st.markdown("#### 📑 Emotion Playlist")
             st.markdown('<div class="playlist-container">', unsafe_allow_html=True)
             for i, s in enumerate(songs):
