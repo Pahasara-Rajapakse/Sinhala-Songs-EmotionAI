@@ -42,6 +42,7 @@ st.markdown("""
     background-color: rgba(255, 215, 0, 0.15) !important;
     border: 2px solid #ffd700 !important;
     color: #ffd700 !important;
+    transform: scale(1.05);
 }
 
 /* Player Card Styling */
@@ -54,6 +55,7 @@ st.markdown("""
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
 /* 1. Player Control Buttons (Gold) */
@@ -66,10 +68,15 @@ div.stButton > button {
     font-size: 0.85rem !important;
     font-weight: 600 !important;
     text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
 }
 div.stButton > button:hover {
     background: rgba(255, 215, 0, 0.15) !important;
     border: 1px solid #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
 }
 
 /* 2. Playlist Buttons (White) */
@@ -87,25 +94,44 @@ div.stButton > button:hover {
     border: 1px solid #ffffff !important;
 }
 
-/* Active Song Style */
+/* Highlight Active Song in Playlist */
 .active-song div.stButton > button {
     border: 1px solid #ffd700 !important;
     background: rgba(255, 215, 0, 0.1) !important;
     color: #ffd700 !important;
 }
 
-.footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; text-align: center; }
+.footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; text-align: center; letter-spacing: 1px; }
+.footer-sub { color: #666666 !important; font-size: 0.8rem !important; text-align: center; }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("<h1 class='main-title'>🎧 Sinhala Emotion Music Player</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>Experience Music Through the Lens of AI</p>", unsafe_allow_html=True)
 
-# ====================== 3. MODEL & HELPERS ======================
+# ====================== 3. MODEL ======================
 @st.cache_resource
 def load_model(path: str):
     return tf.keras.models.load_model(path)
 
+with st.sidebar:
+    st.markdown("<h2 style='color:#ffffff;'>🧠 AI Engine</h2>", unsafe_allow_html=True)
+    model_path = st.text_input("Model path", "mobileNetV2.keras")
+    try:
+        model = load_model(model_path)
+        st.success("Model Loaded Successfully")
+    except:
+        st.error("Model Load Error"); st.stop()
+    
+    # --- ADMIN DOWNLOAD (SIDEBAR) ---
+    st.markdown("<hr style='opacity:0.2;'>", unsafe_allow_html=True)
+    if os.path.exists("user_feedback.csv"):
+        st.markdown("### 📊 Test Results")
+        with open("user_feedback.csv", "rb") as f:
+            st.download_button("📥 Download Feedback CSV", f, "testing_results.csv", "text/csv", use_container_width=True)
+    st.markdown("<hr style='opacity:0.2;'>", unsafe_allow_html=True)
+
+# ====================== 4. HELPERS ======================
 def extract_logmel(y):
     mel = librosa.feature.melspectrogram(y=y, sr=SR, n_mels=N_MELS, n_fft=N_FFT, hop_length=HOP_LENGTH)
     return librosa.power_to_db(mel, ref=np.max).astype(np.float32)
@@ -115,94 +141,123 @@ def classify_song(path):
     if len(y) < TARGET_FRAMES: y = np.pad(y, (0, TARGET_FRAMES - len(y)))
     mel = extract_logmel(y)
     mel = (mel - mel.mean()) / (mel.std() + 1e-6)
-    if mel.shape[1] < TARGET_FRAMES: mel = np.pad(mel, ((0,0),(0,TARGET_FRAMES - mel.shape[1])))
-    else: mel = mel[:, :TARGET_FRAMES]
+    if mel.shape[1] < TARGET_FRAMES:
+        mel = np.pad(mel, ((0,0),(0,TARGET_FRAMES - mel.shape[1])))
+    else:
+        mel = mel[:, :TARGET_FRAMES]
     x = np.repeat(np.expand_dims(mel, axis=-1), 3, axis=-1)
     x = np.expand_dims(x, axis=0)
     pred = model.predict(x, verbose=0)[0]
     return EMOTION_CLASSES[int(np.argmax(pred))], float(np.max(pred))
 
-# ====================== 4. SIDEBAR & LOGIC ======================
-with st.sidebar:
-    st.markdown("<h2 style='color:white;'>🧠 AI Engine</h2>", unsafe_allow_html=True)
-    model_path = st.text_input("Model path", "mobileNetV2.keras")
-    try:
-        model = load_model(model_path)
-        st.success("Model Ready")
-    except:
-        st.error("Model Error"); st.stop()
-    
-    st.markdown("---")
-    if os.path.exists("user_feedback.csv"):
-        with open("user_feedback.csv", "rb") as f:
-            st.download_button("📥 Download Feedback Data", f, "testing_results.csv", "text/csv")
-
-if "library" not in st.session_state: st.session_state.library = None
+# ====================== 5. LIBRARY LOGIC ======================
+if "library" not in st.session_state:
+    st.session_state.library = None
 
 if st.session_state.library is None:
-    uploaded_files = st.file_uploader("Upload your tracks", type=['mp3', 'wav'], accept_multiple_files=True)
-    if uploaded_files and st.button("🚀 Analyze Library", use_container_width=True):
-        library = {e: [] for e in EMOTION_CLASSES}
-        p_bar = st.progress(0)
-        if not os.path.exists("temp_songs"): os.makedirs("temp_songs")
-        for i, f in enumerate(uploaded_files):
-            p = os.path.join("temp_songs", f.name)
-            with open(p, "wb") as file: file.write(f.getbuffer())
-            emo, conf = classify_song(p)
-            library[emo].append({"name": Path(f.name).stem, "path": p, "confidence": conf})
-            p_bar.progress((i + 1) / len(uploaded_files))
-        st.session_state.library = library
-        st.session_state.current_index = {e: 0 for e in EMOTION_CLASSES}
-        st.rerun()
+    st.markdown("""
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin: 20px;">
+            <h2 style="color: #ffffff;">🎵 Build Your AI Music Library</h2>
+            <p style="color: #bbb;">Upload songs to automatically sort them by emotion</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    uploaded_files = st.file_uploader("", type=['mp3', 'wav'], accept_multiple_files=True, key="uploader")
 
-# ====================== 5. UI PLAYER ======================
+    if uploaded_files:
+        if st.button("🚀 Start AI Analysis", use_container_width=True):
+            library = {e: [] for e in EMOTION_CLASSES}
+            status_container = st.empty()
+            progress_bar = st.progress(0)
+            if not os.path.exists("temp_songs"): os.makedirs("temp_songs")
+
+            for i, uploaded_file in enumerate(uploaded_files):
+                temp_path = os.path.join("temp_songs", uploaded_file.name)
+                with open(temp_path, "wb") as f: f.write(uploaded_file.getbuffer())
+                emo, conf = classify_song(temp_path)
+                library[emo].append({"name": Path(uploaded_file.name).stem, "path": temp_path, "confidence": conf})
+                progress_bar.progress((i + 1) / len(uploaded_files))
+                status_container.markdown(f"<p style='text-align:center; color:#ffd700;'>Analyzing: {uploaded_file.name}</p>", unsafe_allow_html=True)
+
+            st.session_state.library = library
+            st.session_state.current_index = {e: 0 for e in EMOTION_CLASSES}
+            st.rerun()
+
+# ====================== 6. BALANCED PLAYER UI ======================
 else:
-    tabs = st.tabs([f"{EMO_ICONS[e]} {e}" for e in EMOTION_CLASSES])
+    with st.sidebar:
+        if st.button("↺ Reset & Upload New", use_container_width=True):
+            st.session_state.library = None
+            st.rerun()
+
+    tab_titles = [f"{EMO_ICONS[e]} {e}" for e in EMOTION_CLASSES]
+    tabs = st.tabs(tab_titles)
+
     for emo, tab in zip(EMOTION_CLASSES, tabs):
         with tab:
             songs = st.session_state.library.get(emo, [])
-            if not songs: st.info("No songs here."); continue
-            
+            if not songs:
+                st.markdown(f"<div style='text-align:center; padding:50px; color:#666;'>No {emo} songs found in this batch.</div>", unsafe_allow_html=True)
+                continue
+
             idx = st.session_state.current_index.get(emo, 0)
             song = songs[idx]
 
             # Player Card
-            st.markdown(f'<div class="player-card"><div><h3>{song["name"]}</h3>'
-                        f'<p style="color:#ffd700;">AI Confidence: {song["confidence"]:.1%}</p></div>'
-                        f'<div style="font-size:3.5rem;">{EMO_ICONS[emo]}</div></div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="player-card">
+                <div>
+                    <h5 style="margin:0; color:#ffffff;">{song['name']}</h5>
+                    <p style="color:#ffd700; margin:0; font-size:1.1rem;">AI Match: <b>{song['confidence']:.1%}</b></p>
+                </div>
+                <div style="font-size: 3.5rem;">{EMO_ICONS[emo]}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-            col1, col2, col3 = st.columns([1, 2, 1])
-            with col2:
+            # Player Control Section
+            col_p1, col_p2, col_p3 = st.columns([1, 2, 1])
+            with col_p2:
                 with open(song["path"], "rb") as f: st.audio(f.read())
             
-            # Control Buttons (Gold)
+            st.markdown("<br>", unsafe_allow_html=True)
             c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
             with c2:
-                if st.button("⏮ Previous", key=f"p_{emo}"):
+                if st.button("⏮ Previous", key=f"prev_{emo}", use_container_width=True):
                     st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
             with c4:
-                if st.button("Next ⏭", key=f"n_{emo}"):
+                if st.button("Next ⏭", key=f"next_{emo}", use_container_width=True):
                     st.session_state.current_index[emo] = (idx + 1) % len(songs); st.rerun()
 
-            # --- Feedback Section (Crucial for Research!) ---
+            # --- 📝 NEW: FEEDBACK FORM (Clean Integration) ---
             st.markdown("<br>", unsafe_allow_html=True)
-            with st.expander("📝 Verify This Result (User Testing)"):
-                with st.form(key=f"f_{emo}_{idx}"):
+            with st.expander("📝 Submit User Feedback (Research Validation)"):
+                with st.form(key=f"feedback_{emo}_{idx}"):
                     u_name = st.text_input("Your Name")
                     u_emo = st.selectbox("Your Actual Emotion:", ["Select...", "Calm", "Energetic", "Happy", "Romantic", "Sad"])
-                    if st.form_submit_button("Submit Validation"):
+                    if st.form_submit_button("Submit Data"):
                         if u_name and u_emo != "Select...":
-                            data = {"User": u_name, "Song": song['name'], "System": emo, "Actual": u_emo, "Match": "Yes" if emo == u_emo else "No", "Time": time.strftime("%H:%M:%S")}
-                            pd.DataFrame([data]).to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
-                            st.success("Feedback saved! You're a legend.")
+                            res = {"User": u_name, "Song": song['name'], "System": emo, "Actual": u_emo, "Match": "Yes" if emo == u_emo else "No", "Time": time.strftime("%H:%M:%S")}
+                            df = pd.DataFrame([res])
+                            df.to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
+                            st.success(f"Feedback for '{song['name']}' saved!")
 
-            # Playlist Area (White)
+            # Playlist Section (White Buttons)
+            st.markdown("<hr style='opacity:0.1;'>", unsafe_allow_html=True)
             st.markdown("#### 📑 Emotion Playlist")
             st.markdown('<div class="playlist-container">', unsafe_allow_html=True)
             for i, s in enumerate(songs):
-                is_active = "active-song" if i == idx else ""
-                st.markdown(f'<div class="{is_active}">', unsafe_allow_html=True)
-                if st.button(f"{i+1:02d}. {s['name']}", key=f"l_{emo}_{i}", use_container_width=True):
+                active_class = "active-song" if i == idx else ""
+                st.markdown(f'<div class="{active_class}">', unsafe_allow_html=True)
+                if st.button(f"{i+1:02d}. {s['name']}", key=f"list_{emo}_{i}", use_container_width=True):
                     st.session_state.current_index[emo] = i; st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
+
+# FOOTER
+st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
+st.markdown("""
+<div style='text-align:center; padding-bottom: 2rem;'>
+    <p class='footer-text'>Powered by <b>MobileNetV2</b> & <b>TensorFlow</b></p>
+    <p class='footer-sub'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
+</div>
+""", unsafe_allow_html=True)
