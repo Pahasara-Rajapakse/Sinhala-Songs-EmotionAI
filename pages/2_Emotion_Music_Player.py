@@ -205,7 +205,7 @@ else:
             # --- BALANCED PLAYER CONTROLS (GOLD) ---
             st.markdown("<br>", unsafe_allow_html=True)
             # Using 5 columns and putting buttons in 2 and 4 ensures absolute center balance
-            c1, c2, c3, c4, c5 = st.columns([1, 1, 0.5, 1, 1])
+            c1, c2, c3, c4, c5 = st.columns([1, 3, 0.5, 1, 1])
             with c2:
                 if st.button("⏮ Previous", key=f"p_{emo}"):
                     st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
