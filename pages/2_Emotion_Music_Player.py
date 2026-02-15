@@ -42,7 +42,8 @@ st.markdown("""
     color: #ffd700 !important;
 }
 
-/* --- GOLD BUTTONS (Player & Sidebar & Upload) --- */
+/* --- 1. PLAYER & SIDEBAR BUTTONS (GOLD) --- */
+/* We target buttons that are NOT inside the playlist container */
 div.stButton > button {
     height: 45px !important; 
     border-radius: 10px !important;
@@ -51,28 +52,33 @@ div.stButton > button {
     color: #ffd700 !important;
     font-weight: 600 !important;
     width: 100% !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* --- PLAYLIST BUTTONS (STRICTLY PURE WHITE) --- */
-.playlist-container div.stButton > button {
-    background: transparent !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+/* --- 2. PLAYLIST BUTTONS (PURE WHITE) --- */
+/* Using an ID-like selector to force white on playlist items */
+div[data-testid="stVerticalBlock"] .playlist-container div.stButton > button {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
     text-align: left !important;
     font-weight: 400 !important;
+    justify-content: flex-start !important;
 }
 
-/* Active Highlight for Playlist (Gold for current song) */
-.active-song div.stButton > button {
+/* Current Playing Song in Playlist (Gold) */
+div[data-testid="stVerticalBlock"] .active-song div.stButton > button {
     border: 1px solid #ffd700 !important;
     background: rgba(255, 215, 0, 0.15) !important;
     color: #ffd700 !important;
 }
 
-/* Audio Player Centering */
+/* Audio Player Alignment */
 .stAudio { width: 100% !important; }
 
-/* General UI Fixes */
+/* Player Card */
 .player-card {
     background: rgba(255, 255, 255, 0.05);
     border-left: 5px solid #ffd700;
@@ -84,9 +90,8 @@ div.stButton > button {
     align-items: center;
 }
 
-.footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; letter-spacing: 1px; }
+.footer-text { color: #bbbbbb !important; font-size: 0.9rem !important; }
 .footer-sub { color: #666666 !important; font-size: 0.8rem !important; }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -186,19 +191,19 @@ else:
                         f'<p style="color:#ffd700;">AI Confidence: {song["confidence"]:.1%}</p></div>'
                         f'<div style="font-size:3.5rem;">{EMO_ICONS[emo]}</div></div>', unsafe_allow_html=True)
 
-            # Center Audio Player (Balanced Columns)
-            col_left, col_mid, col_right = st.columns([1.5, 7, 1.5])
-            with col_mid:
+            # Center Audio Player
+            player_col1, player_col2, player_col3 = st.columns([1, 4, 1])
+            with player_col2:
                 with open(song["path"], "rb") as f: st.audio(f.read())
             
             # --- BALANCED PLAYER CONTROLS (GOLD) ---
             st.markdown("<br>", unsafe_allow_html=True)
-            # 5-Column layout with symmetric spacing
-            btn_c1, btn_c2, btn_c3, btn_c4, btn_c5 = st.columns([1, 1.5, 0.5, 1.5, 1])
-            with btn_c2:
+            # Symmetry: [Empty, Button, Spacing, Button, Empty]
+            c1, c2, c3, c4, c5 = st.columns([1.5, 1, 0.5, 1, 1.5])
+            with c2:
                 if st.button("⏮ Previous", key=f"p_{emo}"):
                     st.session_state.current_index[emo] = max(0, idx - 1); st.rerun()
-            with btn_c4:
+            with c4:
                 if st.button("Next ⏭", key=f"n_{emo}"):
                     st.session_state.current_index[emo] = (idx + 1) % len(songs); st.rerun()
 
@@ -213,13 +218,15 @@ else:
                             pd.DataFrame([res]).to_csv("user_feedback.csv", mode='a', header=not os.path.exists("user_feedback.csv"), index=False)
                             st.success("Feedback saved!")
 
-            # --- PURE WHITE PLAYLIST ---
+            # --- PLAYLIST (WHITE) ---
             st.markdown("<hr style='border: 0; height: 1px; background: rgba(255,215,0,0.2);'>", unsafe_allow_html=True) 
             st.markdown("#### 📑 Emotion Playlist")
+            
+            # Use the specific container class to override CSS
             st.markdown('<div class="playlist-container">', unsafe_allow_html=True)
             for i, s in enumerate(songs):
-                active_class = "active-song" if i == idx else "normal-song"
-                st.markdown(f'<div class="{active_class}">', unsafe_allow_html=True)
+                div_class = "active-song" if i == idx else "normal-song"
+                st.markdown(f'<div class="{div_class}">', unsafe_allow_html=True)
                 if st.button(f"{i+1:02d}. {s['name']}", key=f"l_{emo}_{i}", use_container_width=True):
                     st.session_state.current_index[emo] = i; st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -230,6 +237,6 @@ st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(
 st.markdown("""
 <div style='text-align:center; padding-bottom: 2rem;'>
     <p class='footer-text'>Powered by <b>MobileNetV2</b> & <b>TensorFlow</b></p>
-    <p class='footer-sub'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
+    <p class='footer-sub' style='text-align:center;'>Designed For Sinhala Emotion Recognition | Research Project 2026</p>
 </div>
 """, unsafe_allow_html=True)
