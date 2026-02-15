@@ -150,7 +150,7 @@ if st.session_state.library is None:
         </div>
     """, unsafe_allow_html=True)
     
-    uploaded_files = st.file_uploader(type=['mp3', 'wav'], accept_multiple_files=True)
+    uploaded_files = st.file_uploader("", type=['mp3', 'wav'], accept_multiple_files=True)
     if uploaded_files and st.button("🚀 Start AI Analysis", use_container_width=True):
         library = {e: [] for e in EMOTION_CLASSES}
         prog = st.progress(0)
