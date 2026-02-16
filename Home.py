@@ -3,7 +3,7 @@ import qrcode
 from io import BytesIO
 
 st.set_page_config(
-    page_title="Sinhala AI Analyzer",
+    page_title="Sinhala Song Emotion AI",
     page_icon="logo.png",
     layout="wide"
 )
