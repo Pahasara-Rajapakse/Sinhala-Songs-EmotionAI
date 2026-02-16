@@ -1,6 +1,4 @@
 import streamlit as st
-import qrcode
-from io import BytesIO
 
 st.set_page_config(
     page_title="Sinhala Song Emotion AI",
@@ -87,29 +85,6 @@ hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, 
 
 </style>
 """, unsafe_allow_html=True)
-
-# --- QR Code Fix ---
-# Sidebar එකේ පෙන්නමු
-with st.sidebar:
-    st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
-    qr = qrcode.QRCode(
-    version=1,
-    error_correction=qrcode.constants.ERROR_CORRECT_H, # Error correction එක වැඩි කළා
-    box_size=10,
-    border=4, 
-    )
-
-    app_url = "https://sinhala-songs-emotion-ai.streamlit.app/"
-
-    qr.add_data(app_url)
-    qr.make(fit=True)
-
-    # කළු කොටු සහ සුදු පසුබිම (මේක ඕනම ෆෝන් එකකට රීඩ් වෙනවා)
-    img = qr.make_image(fill_color="black", back_color="white") 
-
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    st.image(buf, caption="Scan this with your phone and open with your chrome browser.", width=250) 
     
 # --- PAGE ROUTER SETUP ---
 if 'page' not in st.session_state:
