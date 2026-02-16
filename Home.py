@@ -88,23 +88,22 @@ hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, 
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar එක ඇතුළේ මෙහෙම ලියපන්
-with st.sidebar:
-    st.markdown("---")
-    st.markdown("### 📱 Scan to Open App")
-    
-    app_url = "https://sinhala-songs-emotion-ai.streamlit.app" # මේක හරියටම තියෙනවද බලන්න
-    
-    # QR Code එක Generate කරන සරල ක්‍රමය
-    qr = qrcode.QRCode(box_size=10, border=2)
-    qr.add_data(app_url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="gold", back_color="black") # colors replace කරා
-    
-    # Image එක Streamlit එකට ගැලපෙන විදිහට Convert කිරීම
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    st.image(buf, use_container_width=True)
+# --- QR Code Fix ---
+qr = qrcode.QRCode(
+    version=1,
+    error_correction=qrcode.constants.ERROR_CORRECT_H, # Error correction එක වැඩි කළා
+    box_size=10,
+    border=4, # Border එක අනිවාර්යයෙන් 4ක් තියෙන්න ඕනේ
+)
+qr.add_data(app_url)
+qr.make(fit=True)
+
+# කළු කොටු සහ සුදු පසුබිම (මේක ඕනම ෆෝන් එකකට රීඩ් වෙනවා)
+img = qr.make_image(fill_color="black", back_color="white") 
+
+buf = BytesIO()
+img.save(buf, format="PNG")
+st.image(buf, caption="Scan this with your phone", width=250) # Width එක පොඩ්ඩක් අඩු කළා පේන්න ලේසි වෙන්න
 
 # --- PAGE ROUTER SETUP ---
 if 'page' not in st.session_state:
