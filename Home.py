@@ -2,6 +2,11 @@ import streamlit as st
 import qrcode
 from io import BytesIO
 
+st.set_page_config(
+    page_title="Sinhala AI Analyzer",
+    page_icon="logo.png",
+    layout="wide"
+)
 
 # ====================== STYLES ======================
 st.markdown("""
