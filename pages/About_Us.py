@@ -51,7 +51,7 @@ def show_about_us_full():
 
     # --- Header Section ---
     st.markdown("""
-        <div style="text-align: center; padding-bottom: 10px;">
+        <div style="text-align: center; margin-bottom: 30px;">
             <h1 style='color: #ffffff; font-size: 3.2rem; font-weight: 800; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);'>
                 🎧 Sinhala Song Emotion AI
             </h1>
@@ -140,3 +140,4 @@ def show_about_us_full():
 # පේජ් එක පෙන්නන්න මෙතනින් කෝල් කරන්න
 
 show_about_us_full()
+
