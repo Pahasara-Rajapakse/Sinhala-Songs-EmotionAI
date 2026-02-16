@@ -95,7 +95,10 @@ qr = qrcode.QRCode(
     box_size=10,
     border=4, # Border එක අනිවාර්යයෙන් 4ක් තියෙන්න ඕනේ
 )
-qr.add_data(https://sinhala-songs-emotion-ai.streamlit.app)
+
+app_url = "https://sinhala-songs-emotion-ai.streamlit.app"
+
+qr.add_data(app_url)
 qr.make(fit=True)
 
 # කළු කොටු සහ සුදු පසුබිම (මේක ඕනම ෆෝන් එකකට රීඩ් වෙනවා)
