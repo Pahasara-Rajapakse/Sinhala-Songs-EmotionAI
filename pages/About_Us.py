@@ -55,7 +55,7 @@ def show_about_us_full():
             <h1 style='color: #ffffff; font-size: 3.2rem; font-weight: 800; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);'>
                 🎧 Sinhala Song Emotion AI
             </h1>
-            <p style='color: #888; font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase;'>
+            <p style='color: #ccc; font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase;'>
                 Advanced Music Emotion Recognition Engine
             </p>
         </div>
@@ -138,4 +138,5 @@ def show_about_us_full():
     """, unsafe_allow_html=True)
 
 # පේජ් එක පෙන්නන්න මෙතනින් කෝල් කරන්න
+
 show_about_us_full()
