@@ -18,8 +18,32 @@ def nav_to(page_name):
 # ====================== STYLES ======================
 st.markdown("""
 <style>
-.stApp { background: #000000; color: #ffffff; font-family: 'Inter', sans-serif; }
-h1, h2, h3 { color: #ffffff !important; text-shadow: 0 2px 10px rgba(0,0,0,0.5); text-align: center; }
+.stApp {
+    background: #000000; 
+    color: #ffffff; 
+    font-family: 'Inter', sans-serif; 
+    padding-top: 20px !important;
+}
+            
+h1, h2, h3 { 
+    color: #ffffff !important; 
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5); 
+    text-align: center; }
+            
+.sub-title {
+    text-align: center;
+    color: #ccc;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+}
+            
+/* Sidebar Fix */
+section[data-testid="stSidebar"] {
+    background-color: #0a0a0a !important;
+    border-right: 1px solid rgba(255, 215, 0, 0.1);
+}            
 
 .card {
     background: rgba(255, 255, 255, 0.05);
@@ -76,8 +100,7 @@ hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, 
 if st.session_state.page == "home":
     # HEADER
     st.markdown("<h1 style='text-align:center;'>🎧 Sinhala Song Emotion AI</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#888 !important; font-size:1.1rem; max-width: 800px; margin: auto;'>Next-generation deep learning system designed for Sinhala Music Emotion Recognition and smart playback.</p>", unsafe_allow_html=True)
-    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
+    st.markdown("<p class = 'sub-title'>Next-generation deep learning system designed for Sinhala Music Emotion Recognition and smart playback.</p>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
 # ====================== FEATURES NAVIGATION ======================
@@ -131,15 +154,12 @@ with col3:
         if st.button("View Profiling", key="btn_personality"):
             st.switch_page("pages/3_Find_The_Personality.py")
 
+
 # FOOTER
-st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
 st.markdown("""
 <div style='text-align:center; padding-bottom: 2rem;'>
-    <p style='font-size:0.9rem; letter-spacing:1px;'>
-        Powered by <b>MobileNetV2</b> & <b>TensorFlow</b>
-    </p>
-    <p style='font-size:0.8rem;'>
-        Designed For Sinhala Emotion Recognition | Research Project 2026
-    </p>
+    <p style='color:#888; font-size:0.9rem;'>Powered by MobileNetV2 Architecture & TensorFlow</p>
+    <p style='color:#555; font-size:0.8rem;'>Sinhala Emotion Recognition Research Project © 2026</p>
 </div>
 """, unsafe_allow_html=True)
