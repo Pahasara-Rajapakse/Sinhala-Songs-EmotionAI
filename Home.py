@@ -89,24 +89,27 @@ hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, 
 """, unsafe_allow_html=True)
 
 # --- QR Code Fix ---
-qr = qrcode.QRCode(
+# Sidebar එකේ පෙන්නමු
+with st.sidebar:
+    st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
+    qr = qrcode.QRCode(
     version=1,
     error_correction=qrcode.constants.ERROR_CORRECT_H, # Error correction එක වැඩි කළා
     box_size=10,
     border=4, # Border එක අනිවාර්යයෙන් 4ක් තියෙන්න ඕනේ
-)
+    )
 
-app_url = "https://sinhala-songs-emotion-ai.streamlit.app"
+    app_url = "https://sinhala-songs-emotion-ai.streamlit.app"
 
-qr.add_data(app_url)
-qr.make(fit=True)
+    qr.add_data(app_url)
+    qr.make(fit=True)
 
-# කළු කොටු සහ සුදු පසුබිම (මේක ඕනම ෆෝන් එකකට රීඩ් වෙනවා)
-img = qr.make_image(fill_color="black", back_color="white") 
+    # කළු කොටු සහ සුදු පසුබිම (මේක ඕනම ෆෝන් එකකට රීඩ් වෙනවා)
+    img = qr.make_image(fill_color="black", back_color="white") 
 
-buf = BytesIO()
-img.save(buf, format="PNG")
-st.image(buf, caption="Scan this with your phone", width=250) # Width එක පොඩ්ඩක් අඩු කළා පේන්න ලේසි වෙන්න
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    st.image(buf, caption="Scan this with your phone", width=250) # Width එක පොඩ්ඩක් අඩු කළා පේන්න ලේසි වෙන්න
 
 # --- PAGE ROUTER SETUP ---
 if 'page' not in st.session_state:
