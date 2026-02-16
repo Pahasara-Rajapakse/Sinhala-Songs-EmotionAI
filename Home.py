@@ -1,7 +1,6 @@
 import streamlit as st
 import qrcode
 from io import BytesIO
-from PIL import Image
 
 
 # ====================== STYLES ======================
@@ -84,39 +83,23 @@ hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, 
 </style>
 """, unsafe_allow_html=True)
 
-# --- QR Code Generator ---
-def generate_qr(url):
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
-    )
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="#ffd700", back_color="black") # අපේ Gold & Black Theme එකට හැදුවා
-    return img
-
-# Sidebar එකේ පෙන්නමු
+# Sidebar එක ඇතුළේ මෙහෙම ලියපන්
 with st.sidebar:
     st.markdown("---")
     st.markdown("### 📱 Scan to Open App")
     
-    # මෙතනට උඹේ App එකේ URL එක දාපන් (උදා: Localhost හෝ Streamlit Cloud URL එක)
-    app_url = "https://sinhala-songs-emotion-ai.streamlit.app" 
+    app_url = "https://sinhala-songs-emotion-ai.streamlit.app" # මේක හරියටම තියෙනවද බලන්න
     
-    qr_img = generate_qr(app_url)
+    # QR Code එක Generate කරන සරල ක්‍රමය
+    qr = qrcode.QRCode(box_size=10, border=2)
+    qr.add_data(app_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="gold", back_color="black") # colors replace කරා
     
-    # PIL image එක Streamlit එකේ පෙන්නන්න පුළුවන් විදිහට convert කරමු
+    # Image එක Streamlit එකට ගැලපෙන විදිහට Convert කිරීම
     buf = BytesIO()
-    qr_img.save(buf, format="PNG")
-    st.image(buf, caption="Share with Friends", use_container_width=True)
-
-st.set_page_config(
-    page_title="Sinhala Song Emotion AI",
-    page_icon="logo.png",
-    layout="wide"
-)
+    img.save(buf, format="PNG")
+    st.image(buf, use_container_width=True)
 
 # --- PAGE ROUTER SETUP ---
 if 'page' not in st.session_state:
