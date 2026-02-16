@@ -96,7 +96,7 @@ with st.sidebar:
     version=1,
     error_correction=qrcode.constants.ERROR_CORRECT_H, # Error correction එක වැඩි කළා
     box_size=10,
-    border=4, # Border එක අනිවාර්යයෙන් 4ක් තියෙන්න ඕනේ
+    border=4, 
     )
 
     app_url = "https://sinhala-songs-emotion-ai.streamlit.app/"
@@ -109,8 +109,8 @@ with st.sidebar:
 
     buf = BytesIO()
     img.save(buf, format="PNG")
-    st.image(buf, caption="Scan this with your phone", width=250) # Width එක පොඩ්ඩක් අඩු කළා පේන්න ලේසි වෙන්න
-
+    st.image(buf, caption="Scan this with your phone and open with your chrome browser.", width=250) 
+    
 # --- PAGE ROUTER SETUP ---
 if 'page' not in st.session_state:
     st.session_state.page = "home"
