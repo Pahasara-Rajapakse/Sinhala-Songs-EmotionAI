@@ -24,7 +24,24 @@ st.markdown("""
     background: #000000;
     color: #ffffff;
     font-family: 'Inter', sans-serif;
+    padding-top: 20px !important;
 }
+            
+/* Sidebar Styling */
+section[data-testid="stSidebar"] {
+    background-color: #0a0a0a !important;
+    border-right: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.sub-title {
+    text-align: center;
+    color: #ccc;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+}                       
+                        
 .glass {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
@@ -33,12 +50,14 @@ st.markdown("""
     padding: 1.5rem;
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
+            
 [data-testid="column"] { display: flex; align-items: center; }
 
+/* Custom Button Style */
 .stButton>button {
-    height: 45px !important; 
-    border-radius: 10px !important;
-    background: rgba(255, 215, 0, 0.05) !important; /* පොඩි රත්තරන් පාටක් */
+    height: 5.8rem !important; 
+    border-radius: 20px !important;
+    background: rgba(255, 215, 0, 0.05) !important; 
     border: 1px solid rgba(255, 215, 0, 0.2) !important;
     color: #ffd700 !important;
     font-size: 0.85rem !important;
@@ -48,7 +67,7 @@ st.markdown("""
     transition: all 0.3s ease !important;
     width: 100% !important;
 }
-
+            
 .stButton>button:hover {
     background: rgba(255, 215, 0, 0.15) !important;
     border: 1px solid #ffd700 !important;
@@ -153,39 +172,42 @@ def personality_card(trait, data):
 # ==============================
 # MAIN APP
 # ==============================
-st.markdown("<h1 style='text-align:center;'>🎧 Sinhala Song Personality Profiling</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center;color:#ccc;'>Analyze the acoustic traits of music to predict listener personality</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align:center;'>🎧 Sinhala Song Emotion AI </h1>", unsafe_allow_html=True)
+st.markdown("<p class ='sub-title'>Analyze the acoustic traits of music to predict listener personality</p>", unsafe_allow_html=True)
+st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
 
-# Initialize session state for the file
-if 'active_file' not in st.session_state:
-    st.session_state.active_file = None
+# --- SESSION STATE FIX ---
+# Changed 'active_file' to 'active_file_personality' to prevent cross-page conflict
+if 'active_file_personality' not in st.session_state:
+    st.session_state.active_file_personality = None
 
 # Show uploader ONLY if no file is active
-if st.session_state.active_file is None:
+if st.session_state.active_file_personality is None:
     st.markdown("""
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 20px; border: 2px dashed rgba(255, 215, 0, 0.3); text-align: center; margin-bottom: 10px;">
-            <p style="margin: 0; font-size: 1.2rem; color: #ffffff; font-weight: bold;">Upload Your Song</p>
-            <h7 style="color: #666; font-size: 0.9rem;">MP3 or WAV (Max 90s Analysis)</h7>
+         <div style="background: rgba(255, 215, 0, 0.03); padding: 10px; border-radius: 25px; border: 1px dashed #ffd700; text-align: center;">
+            <h2 style="color: #ffd700; margin-bottom:10px;">Drop Your Audio Track</h2>
+            <p style="color: #888;">We analyze BPM, Timbre, and Energy to map your vibe.</p>
         </div>
     """, unsafe_allow_html=True)
     
-    uploaded = st.file_uploader("", type=["mp3", "wav"], key="main_uploader")
+    uploaded = st.file_uploader("", type=["mp3", "wav"], key="personality_uploader")
     if uploaded:
-        st.session_state.active_file = uploaded
+        st.session_state.active_file_personality = uploaded
         st.rerun()
 
 # Processing if file is uploaded
-if st.session_state.active_file is not None:
-    uploaded_file = st.session_state.active_file
+if st.session_state.active_file_personality is not None:
+    uploaded_file = st.session_state.active_file_personality
     
     # Premium Player & Reset Button UI (Updated)
-    st.markdown('<div class="glass" style="padding: 15px; margin-bottom: 20px; border-left: 5px solid #ffd700;">', unsafe_allow_html=True)
+    st.markdown('', unsafe_allow_html=True)
     
     col_info, col_reset = st.columns([0.8, 0.2])
     
     with col_info:
         st.markdown(f"""
-            <div style="display: flex; align-items: center;">
+        <div class="glass" style="padding: 15px; margin-bottom: 20px; border-left: 5px solid #ffd700;">            
+            <div style="display: flex; align-items: center ;">
                 <div style="background: linear-gradient(135deg, #ffd700, #ff8c00); padding: 10px; border-radius: 10px; margin-right: 15px; box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);">
                     <span style="font-size: 20px;">🎵</span>
                 </div>
@@ -194,19 +216,20 @@ if st.session_state.active_file is not None:
                     <p style="margin: 0; color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Acoustic Analysis Active</p>
                 </div>
             </div>
+        </div>    
         """, unsafe_allow_html=True)
     
     with col_reset:
-    
         if st.button("↺ NEW ANALYSIS", use_container_width=True):
-            st.session_state.active_file = None
+            st.session_state.active_file_personality = None
             st.rerun()
             
     st.markdown('</div>', unsafe_allow_html=True)
 
+    st.audio(uploaded_file)
+
     # Trigger Analysis
     with st.spinner("🧠 AI is extracting acoustic personality features..."):
-
         tempo, energy, timbre, mode = extract_features(uploaded_file)
         f_levels = {
             "tempo": level(normalize(tempo, "tempo_bpm")),
@@ -236,13 +259,11 @@ if st.session_state.active_file is not None:
     # ==============================
     # 5-TRAIT INSIGHT GENERATOR
     # ==============================
-    
     summary_parts = []
     for trait, data in personality.items():
         lvl = data['level'].lower()
         summary_parts.append(f"<b style='color:#ffd700;'>{lvl} {trait}</b>")
 
-   
     full_traits_str = ", ".join(summary_parts[:-1]) + " and " + summary_parts[-1]
 
     # FINAL INSIGHT TEXT
@@ -274,15 +295,11 @@ if st.session_state.active_file is not None:
     </div>
     """, unsafe_allow_html=True)
 
-# ====================== FOOTER (FIXED SPELLING) ======================
+# FOOTER
 st.markdown("<br><hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
 st.markdown("""
 <div style='text-align:center; padding-bottom: 2rem;'>
-    <p style='color:#888; font-size:0.9rem; letter-spacing:1px; margin-bottom:5px;'>
-        Powered by <b>Librosa</b> & <b>Streamlit</b>
-    </p>
-    <p style='color:#666; font-size:0.8rem;'>
-        Designed For Sinhala Emotion Recognition | Research Project 2026
-    </p>
+    <p style='color:#888; font-size:0.9rem;'>Powered by <b>Librosa</b> & <b>Streamlit</b></p>
+    <p style='color:#555; font-size:0.8rem;'>Designed For Sinhala Emotion Recognition | Research Project © 2026</p>
 </div>
 """, unsafe_allow_html=True)
