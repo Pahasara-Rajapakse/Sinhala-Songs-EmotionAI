@@ -185,7 +185,7 @@ if 'active_file_personality' not in st.session_state:
 if st.session_state.active_file_personality is None:
     st.markdown("""
          <div style="background: rgba(255, 215, 0, 0.03); padding: 10px; border-radius: 25px; border: 1px dashed #ffd700; text-align: center;">
-            <h2 style="color: #ffd700; margin-bottom:10px;">Drop Your Audio Track</h2>
+            <h2 style="color: #ffd700; margin-bottom:10px;">Upload Audio Track</h2>
             <p style="color: #888;">We analyze BPM, Timbre, and Energy to map your vibe.</p>
         </div>
     """, unsafe_allow_html=True)
