@@ -94,16 +94,45 @@ except FileNotFoundError:
 # LOGIC FUNCTIONS
 # ==============================
 def extract_features(audio_file):
+    # 1. Load Audio
     y, sr = librosa.load(audio_file, sr=SR, duration=MAX_AUDIO_DURATION)
-    tempo_array, _ = librosa.beat.beat_track(y=y, sr=sr)
-    tempo = float(tempo_array[0]) if isinstance(tempo_array, (np.ndarray, list)) else float(tempo_array)
+    
+    # 2. Extract Tempo (BPM)
+    # start_bpm=80 මගින් Octave doubling අවම කර සත්‍ය වේගය ලබා ගනී
+    tempo, _ = librosa.beat.beat_track(y=y, sr=sr, start_bpm=80) 
+    tempo = float(tempo)
+
+    # 3. Extract Energy (Loudness in dB)
     rms = librosa.feature.rms(y=y)[0]
     energy = np.mean(librosa.amplitude_to_db(rms, ref=np.max))
+
+    # 4. Extract Timbre (Spectral Centroid in Hz)
     timbre = np.mean(librosa.feature.spectral_centroid(y=y, sr=sr))
+
+    # 5. Extract Musical Mode (All 12 Keys - Tracking E Minor etc.)
     chroma = librosa.feature.chroma_stft(y=y, sr=sr)
     chroma_mean = np.mean(chroma, axis=1)
-    mode = "Major" if (chroma_mean[0] + chroma_mean[4] + chroma_mean[7]) > \
-                      (chroma_mean[0] + chroma_mean[3] + chroma_mean[7]) else "Minor"
+
+    major_scores = []
+    minor_scores = []
+    
+    # Binary Templates for Major and Minor
+    major_base = np.array([1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1])
+    minor_base = np.array([1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0])
+
+    # Keys 12 ම (C, C#, D, D#, E...) සඳහා Template Matching සිදු කිරීම
+    for i in range(12):
+        # np.roll මගින් සින්දුවේ chroma අගයන් shift කර සියලුම keys පරීක්ෂා කරයි
+        major_scores.append(np.dot(np.roll(chroma_mean, -i), major_base))
+        minor_scores.append(np.dot(np.roll(chroma_mean, -i), minor_base))
+
+    # වැඩිම ගැලපීමක් පෙන්වන score එක අනුව Mode එක තීරණය කරයි
+    # Minor එකට 1.1 ක weight එකක් දී ඇත්තේ Minor keys වඩාත් සංවේදීව හඳුනා ගැනීමටයි
+    if (max(minor_scores) * 1.1) > max(major_scores):
+        mode = "Minor"
+    else:
+        mode = "Major"
+
     return tempo, energy, timbre, mode
 
 def normalize(value, feature):
@@ -132,7 +161,7 @@ def compute_big_five(feature_levels):
     results = {}
     for t, v in votes.items():
         avg = sum(v)/len(v) if v else 0
-        lbl = "Low" if avg < 0.67 else "Moderate" if avg < 1.33 else "High"
+        lbl = "Low" if avg <= 0.67 else "Moderate" if avg <= 1.33 else "High"
         results[t] = {"level": lbl, "confidence": avg / 2}
     return results
 
@@ -185,7 +214,7 @@ if 'active_file_personality' not in st.session_state:
 if st.session_state.active_file_personality is None:
     st.markdown("""
          <div style="background: rgba(255, 215, 0, 0.03); padding: 10px; border-radius: 25px; border: 1px dashed #ffd700; text-align: center;">
-            <h2 style="color: #ffd700; margin-bottom:10px;">Upload Audio Track</h2>
+            <h2 style="color: #ffd700; margin-bottom:10px;">Drop Your Audio Track</h2>
             <p style="color: #888;">We analyze BPM, Timbre, Mode and Energy to map your vibe.</p>
         </div>
     """, unsafe_allow_html=True)
