@@ -205,20 +205,36 @@ def classify_song(path):
     return EMOTION_CLASSES[final_idx], float(avg_pred[final_idx])
 
 # ====================== 5. RESET BUTTON (Sidebar) ======================
+# ====================== 5. OPTIONS (Download & Flush) ======================
 with st.sidebar:
     st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
     st.markdown("<h3 style='color:#ffd700;'>📊 Options</h3>", unsafe_allow_html=True)
-    if os.path.exists("responses.csv"):
-        with open("responses.csv", "rb") as f:
-                st.download_button("📥 Download CSV", f, "song_feedback.csv", "text/csv", use_container_width=True)
+    
+    responses_file = "responses.csv"
+    
+    if os.path.exists(responses_file):
+        # CSV එක කියවලා Data ටික memory එකට ගන්නවා
+        with open(responses_file, "rb") as f:
+            csv_data = f.read()
+            
+        # Download Button එක
+        st.download_button(
+            label="📥 Download & Flush CSV",
+            data=csv_data,
+            file_name="song_feedback_final.csv",
+            mime="text/csv",
+            use_container_width=True,
+            key="download_and_flush"
+        )
+        
+        # දත්ත මකන්න ඕනේ නම් මේ බටන් එක ඔබන්න කියන්න පුළුවන්
+        if st.button("🗑️ Clear Collected Data", help="This will permanently delete the current CSV file from the server."):
+            os.remove(responses_file)
+            st.success("Database Flushed Successfully!")
+            time.sleep(1)
+            st.rerun()
     else:
         st.button("📥 No Data Yet", disabled=True, use_container_width=True)
-
-with st.sidebar:
-    if st.button("🗑️ Reset Library", key="reset_btn", use_container_width=True):
-        if "library" in st.session_state: del st.session_state.library
-        if "current_index" in st.session_state: del st.session_state.current_index
-        st.rerun()
 
 # ====================== 6. UPLOADER ======================
 if "library" not in st.session_state:
