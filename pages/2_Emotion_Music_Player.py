@@ -205,36 +205,44 @@ def classify_song(path):
     return EMOTION_CLASSES[final_idx], float(avg_pred[final_idx])
 
 # ====================== 5. RESET BUTTON (Sidebar) ======================
-# ====================== 5. OPTIONS (Download & Flush) ======================
+# ====================== 5. SIDEBAR OPTIONS (Reset & Data Management) ======================
 with st.sidebar:
     st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
-    st.markdown("<h3 style='color:#ffd700;'>📊 Options</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#ffd700;'>📊 System Options</h3>", unsafe_allow_html=True)
+
+    # --- 1. Reset Music Library (අලුත් සින්දු දාන්න පරණ ඒවා අයින් කරන බටන් එක) ---
+    if "library" in st.session_state:
+        if st.button("🗑️ Reset Music Library", key="reset_lib_btn", use_container_width=True, help="Clear current songs and upload new ones"):
+            if "library" in st.session_state: del st.session_state.library
+            if "current_index" in st.session_state: del st.session_state.current_index
+            st.rerun()
     
+    st.markdown("<br>", unsafe_allow_html=True) # පොඩි පරතරයක්
+
+    # --- 2. Data Download & Flush (CSV එක මකන කොටස) ---
     responses_file = "responses.csv"
-    
     if os.path.exists(responses_file):
-        # CSV එක කියවලා Data ටික memory එකට ගන්නවා
         with open(responses_file, "rb") as f:
             csv_data = f.read()
             
-        # Download Button එක
         st.download_button(
-            label="📥 Download & Flush CSV",
+            label="📥 Download CSV Data",
             data=csv_data,
-            file_name="song_feedback_final.csv",
+            file_name="song_feedback.csv",
             mime="text/csv",
             use_container_width=True,
-            key="download_and_flush"
+            key="dl_csv"
         )
         
-        # දත්ත මකන්න ඕනේ නම් මේ බටන් එක ඔබන්න කියන්න පුළුවන්
-        if st.button("🗑️ Clear Collected Data", help="This will permanently delete the current CSV file from the server."):
+        if st.button("🔴 Clear Saved Feedbacks", key="clear_csv_btn", use_container_width=True, help="Permanently delete the feedback CSV file"):
             os.remove(responses_file)
-            st.success("Database Flushed Successfully!")
+            st.success("Database Flushed!")
             time.sleep(1)
             st.rerun()
     else:
-        st.button("📥 No Data Yet", disabled=True, use_container_width=True)
+        st.button("📥 No Feedback Data", disabled=True, use_container_width=True)
+
+    st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
 
 # ====================== 6. UPLOADER ======================
 if "library" not in st.session_state:
