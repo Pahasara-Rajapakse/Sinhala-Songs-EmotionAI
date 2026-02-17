@@ -204,7 +204,7 @@ def classify_song(path):
     final_idx = int(np.argmax(avg_pred))
     return EMOTION_CLASSES[final_idx], float(avg_pred[final_idx])
 
-# ====================== 5. RESET BUTTON (Sidebar) ======================
+
 # ====================== 5. SIDEBAR OPTIONS (Reset & Data Management) ======================
 with st.sidebar:
     st.markdown("<hr style='border: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,215,0,0.3), transparent);'>", unsafe_allow_html=True)
@@ -216,8 +216,6 @@ with st.sidebar:
             if "library" in st.session_state: del st.session_state.library
             if "current_index" in st.session_state: del st.session_state.current_index
             st.rerun()
-    
-    st.markdown("<br>", unsafe_allow_html=True) # පොඩි පරතරයක්
 
     # --- 2. Data Download & Flush (CSV එක මකන කොටස) ---
     responses_file = "responses.csv"
