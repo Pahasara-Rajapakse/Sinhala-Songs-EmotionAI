@@ -94,46 +94,86 @@ except FileNotFoundError:
 # LOGIC FUNCTIONS
 # ==============================
 def extract_features(audio_file):
+    # ===============================
     # 1. Load Audio
+    # ===============================
     y, sr = librosa.load(audio_file, sr=SR, duration=MAX_AUDIO_DURATION)
-    
-    # 2. Extract Tempo (BPM)
-    # start_bpm=80 මගින් Octave doubling අවම කර සත්‍ය වේගය ලබා ගනී
-    tempo, _ = librosa.beat.beat_track(y=y, sr=sr, start_bpm=80) 
-    tempo = float(tempo)
 
-    # 3. Extract Energy (Loudness in dB)
+    if len(y) == 0:
+        raise ValueError("Audio file is empty or too short.")
+
+    # ===============================
+    # 2. Robust Multi-Tempo Detection
+    # ===============================
+    onset_env = librosa.onset.onset_strength(y=y, sr=sr)
+
+    # Get multiple tempo candidates
+    tempo_candidates = librosa.beat.tempo(
+        onset_envelope=onset_env,
+        sr=sr,
+        aggregate=None
+    )
+
+    tempo_candidates = np.array(tempo_candidates)
+
+    # Remove unrealistic extremes
+    tempo_candidates = tempo_candidates[
+        (tempo_candidates > 40) & (tempo_candidates < 200)
+    ]
+
+    # Normalize into 60–180 BPM range
+    normalized_tempos = []
+    for t in tempo_candidates:
+        while t < 60:
+            t *= 2
+        while t > 180:
+            t /= 2
+        normalized_tempos.append(t)
+
+    normalized_tempos = np.array(normalized_tempos)
+
+    # Final tempo = median of normalized candidates
+    tempo = float(np.median(normalized_tempos)) if len(normalized_tempos) > 0 else float(np.mean(tempo_candidates))
+
+    # ===============================
+    # 3. Loudness (RMS → dB)
+    # ===============================
     rms = librosa.feature.rms(y=y)[0]
-    energy = np.mean(librosa.amplitude_to_db(rms, ref=np.max))
+    loudness_db = float(np.mean(librosa.amplitude_to_db(rms, ref=np.max)))
 
-    # 4. Extract Timbre (Spectral Centroid in Hz)
-    timbre = np.mean(librosa.feature.spectral_centroid(y=y, sr=sr))
+    # ===============================
+    # 4. Timbre (Spectral Centroid)
+    # ===============================
+    spectral_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)
+    timbre = float(np.mean(spectral_centroid))
 
-    # 5. Extract Musical Mode (All 12 Keys - Tracking E Minor etc.)
+    # ===============================
+    # 5. Musical Mode (12-Key Tracking)
+    # ===============================
     chroma = librosa.feature.chroma_stft(y=y, sr=sr)
     chroma_mean = np.mean(chroma, axis=1)
 
+    major_template = np.array([1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1])
+    minor_template = np.array([1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0])
+
     major_scores = []
     minor_scores = []
-    
-    # Binary Templates for Major and Minor
-    major_base = np.array([1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1])
-    minor_base = np.array([1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0])
 
-    # Keys 12 ම (C, C#, D, D#, E...) සඳහා Template Matching සිදු කිරීම
     for i in range(12):
-        # np.roll මගින් සින්දුවේ chroma අගයන් shift කර සියලුම keys පරීක්ෂා කරයි
-        major_scores.append(np.dot(np.roll(chroma_mean, -i), major_base))
-        minor_scores.append(np.dot(np.roll(chroma_mean, -i), minor_base))
+        rotated = np.roll(chroma_mean, -i)
+        major_scores.append(np.dot(rotated, major_template))
+        minor_scores.append(np.dot(rotated, minor_template))
 
-    # වැඩිම ගැලපීමක් පෙන්වන score එක අනුව Mode එක තීරණය කරයි
-    # Minor එකට 1.1 ක weight එකක් දී ඇත්තේ Minor keys වඩාත් සංවේදීව හඳුනා ගැනීමටයි
-    if (max(minor_scores) * 1.1) > max(major_scores):
+    # Slight bias toward minor (good for Sinhala emotional songs)
+    if (max(minor_scores) * 1.05) > max(major_scores):
         mode = "Minor"
     else:
         mode = "Major"
 
-    return tempo, energy, timbre, mode
+    return tempo, loudness_db, timbre, mode
+
+
+
 
 def normalize(value, feature):
     min_v, max_v = FEATURE_REF[feature]["min"], FEATURE_REF[feature]["max"]
