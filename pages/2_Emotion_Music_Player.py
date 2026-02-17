@@ -339,15 +339,8 @@ if "library" in st.session_state:
                     if submit_btn:
                         if u_name and u_actual != "Select...":
                             result = "Matched" if emo == u_actual else "Not Matched"
-                            df = pd.DataFrame([{
-                                 "Song": song['name'], 
-                                 "AI": emo, 
-                                 "User": u_actual, 
-                                 "Name": u_name, 
-                                 "Result": result, 
-                                 "Date": time.strftime("%Y-%m-%d %H:%M")
-                           }])
-                           df.to_csv("responses.csv", mode='a', header=not os.path.exists("responses.csv"), index=False)
+                            df = pd.DataFrame([{"Song": song['name'], "AI": emo, "User": u_actual, "Name": u_name, "Result": result, "Date": time.strftime("%Y-%m-%d %H:%M")}])
+                            df.to_csv("responses.csv", mode='a', header=not os.path.exists("responses.csv"), index=False)
                 
                             #st.balloons() 
                             st.success(f"Thank you {u_name}! Your response has been recorded.")
